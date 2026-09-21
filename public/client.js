@@ -288,6 +288,7 @@ socket.on('hand-started', (state) => {
 });
 
 socket.on('hand-ended', (data) => {
+  startTimerCountdown(0);
   currentRoom = data.state;
   renderTable();
   if (data.results.some(r => r.playerId === mySocketId)) playSound('win');
