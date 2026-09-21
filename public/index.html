@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Hokus Pokers</title>
   <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
@@ -127,7 +127,9 @@
     </div>
 
     <div id="screen-game" class="screen">
+      <div id="mobile-sidebar-backdrop" onclick="closeMobileSidebar()" aria-hidden="true"></div>
       <div id="sidebar">
+        <button class="btn btn-tiny mobile-sidebar-close" onclick="closeMobileSidebar()" aria-label="Close players panel">Close ✕</button>
         <div class="sidebar-section">
           <h3>Players</h3>
           <div id="sidebar-players"></div>
@@ -152,6 +154,7 @@
       <div id="table-container">
         <div id="top-bar">
           <div class="room-info">
+            <button class="btn btn-tiny" id="mobile-sidebar-toggle" onclick="toggleMobileSidebar()" aria-expanded="false" aria-controls="sidebar">Players</button>
             <span id="room-code-display"></span>
             <button class="btn btn-tiny" onclick="copyCode()" title="Copy room code">Copy</button>
             <span id="host-display"></span>

@@ -619,8 +619,11 @@ function renderTable() {
   const tableEl = document.getElementById('poker-table');
   const tableWidth = tableEl.offsetWidth;
   const tableHeight = tableEl.offsetHeight;
-  const rx = tableWidth * 0.42;
-  const ry = tableHeight * 0.38;
+  const portrait = window.matchMedia('(max-width: 600px) and (orientation: portrait)').matches;
+  const seatWidth = portrait ? 62 : 85;
+  const seatHeight = portrait ? 56 : 70;
+  const rx = portrait ? Math.max(0, (tableWidth - seatWidth) / 2 - 5) : tableWidth * 0.42;
+  const ry = portrait ? Math.max(0, (tableHeight - seatHeight) / 2 - 8) : tableHeight * 0.38;
   const cx = tableWidth / 2;
   const cy = tableHeight / 2;
   const maxPlayers = currentRoom.settings.maxPlayers;
@@ -632,8 +635,8 @@ function renderTable() {
     const y = cy + ry * Math.sin(angle);
     const seat = document.createElement('div');
     seat.dataset.seat = seatIdx;
-    seat.style.left = (x - 42) + 'px';
-    seat.style.top = (y - 35) + 'px';
+    seat.style.left = (x - seatWidth / 2) + 'px';
+    seat.style.top = (y - seatHeight / 2) + 'px';
     const p = seatMap[seatIdx];
     if (!p) {
       seat.className = 'seat empty';
@@ -980,3 +983,18 @@ function toggleChat() {
 }
 
 window.addEventListener('resize', () => { if (currentRoom) renderTable(); });
+
+// Mobile player list drawer: preserve spectator, rebuy and host controls.
+function toggleMobileSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const backdrop = document.getElementById('mobile-sidebar-backdrop');
+  const open = !sidebar.classList.contains('open');
+  sidebar.classList.toggle('open', open);
+  backdrop.classList.toggle('open', open);
+  document.getElementById('mobile-sidebar-toggle').setAttribute('aria-expanded', String(open));
+}
+function closeMobileSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('mobile-sidebar-backdrop').classList.remove('open');
+  document.getElementById('mobile-sidebar-toggle').setAttribute('aria-expanded', 'false');
+}
