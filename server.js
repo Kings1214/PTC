@@ -513,16 +513,21 @@ function endHand(room) {
       p.isSittingOut = true;
     }
   });
-  if (room.id === 'TEST01') {
-    if (room._nextHandTimer) clearTimeout(room._nextHandTimer);
-    room._nextHandTimer = setTimeout(() => {
-      room._nextHandTimer = null;
-      if (room.gameState.status === 'playing') {
-        processJoinQueue(room);
-        startHand(room);
-      }
-    }, 10);
-  }
+  // Advance normal rooms too. Never deal until two funded, active players are present.
+  if (room._nextHandTimer) clearTimeout(room._nextHandTimer);
+  room._nextHandTimer = setTimeout(() => {
+    room._nextHandTimer = null;
+    if (room.gameState.status !== 'playing' || room.gameState.bettingRound !== 'showdown') return;
+    processJoinQueue(room);
+    const eligible = Array.from(room.players.values()).filter(p => p.chips > 0 && !p.isSittingOut);
+    if (eligible.length < 2) {
+      room.gameState.status = 'waiting';
+      broadcastState(room);
+      return;
+    }
+    startHand(room);
+    broadcastState(room);
+  }, room.id === 'TEST01' ? 10 : 5000);
 }
 
 io.on('connection', (socket) => {
