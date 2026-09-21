@@ -362,6 +362,9 @@ function clearTurnTimer(room) {
     clearTimeout(room.turnTimer);
     room.turnTimer = null;
   }
+  room.gameState.timerEnd = 0;
+  room.players.forEach((_, sid) => io.to(sid).emit('turn-timer', { playerId: null, endTime: 0 }));
+  room.spectators.forEach(sid => io.to(sid).emit('turn-timer', { playerId: null, endTime: 0 }));
 }
 
 function getCurrentPlayer(room) {
