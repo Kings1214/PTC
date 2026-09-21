@@ -620,10 +620,10 @@ function renderTable() {
   const tableWidth = tableEl.offsetWidth;
   const tableHeight = tableEl.offsetHeight;
   const portrait = window.matchMedia('(max-width: 600px) and (orientation: portrait)').matches;
-  const seatWidth = portrait ? 62 : 85;
-  const seatHeight = portrait ? 56 : 70;
+  const seatWidth = portrait ? Math.min(96, Math.max(64, tableWidth * 0.22)) : 85;
+  const seatHeight = portrait ? 65 : 70;
   const rx = portrait ? Math.max(0, (tableWidth - seatWidth) / 2 - 5) : tableWidth * 0.42;
-  const ry = portrait ? Math.max(0, (tableHeight - seatHeight) / 2 - 8) : tableHeight * 0.38;
+  const ry = portrait ? Math.max(0, (tableHeight - seatHeight) / 2 - 10) : tableHeight * 0.38;
   const cx = tableWidth / 2;
   const cy = tableHeight / 2;
   const maxPlayers = currentRoom.settings.maxPlayers;
@@ -647,6 +647,7 @@ function renderTable() {
       `;
     } else {
       seat.className = 'seat';
+      if (p.id === mySocketId) seat.classList.add('my-seat');
       if (currentRoom.gameState.currentPlayerIndex === p.seatIndex && !p.folded && currentRoom.gameState.status === 'playing') {
         seat.classList.add('active');
       }
@@ -671,6 +672,10 @@ function renderTable() {
     }
     seatsContainer.appendChild(seat);
   }
+  const heroCards = document.getElementById('mobile-hero-cards');
+  const ownPlayer = currentRoom.players.find(p => p.id === mySocketId);
+  heroCards.innerHTML = ownPlayer && ownPlayer.holeCards && ownPlayer.holeCards.length
+    ? ownPlayer.holeCards.map(c => `<div class="card ${RED_SUITS[c.s] ? 'red' : ''}"><div class="card-rank">${displayRank(c.r)}</div><div class="card-suit">${SUIT_SYMBOLS[c.s]}</div></div>`).join('') : '';
   const ccDiv = document.getElementById('community-cards');
   ccDiv.innerHTML = '';
   currentRoom.gameState.communityCards.forEach(c => {

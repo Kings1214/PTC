@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Hokus Pokers</title>
+  <title>Pay the Cost | Texas Hold’em</title>
   <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 </head>
@@ -171,6 +171,7 @@
         </div>
 
         <div id="poker-table">
+          <div class="ptc-felt-logo" aria-hidden="true">PAY THE COST</div>
           <div id="win-banner" class="win-banner"></div>
           <div id="start-overlay" class="start-overlay">
             <button class="btn btn-start" id="btn-start-game" onclick="startGame()">START GAME</button>
@@ -189,6 +190,7 @@
         </div>
 
         <div id="action-bar">
+          <div id="mobile-hero-cards" aria-label="Your cards"></div>
           <div id="turn-indicator" class="turn-indicator hidden">YOUR TURN &mdash; choose an action below</div>
           <div id="action-status" class="action-status">Waiting for game to start...</div>
           <div id="timer-bar-container">
