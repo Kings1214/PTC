@@ -704,3 +704,35 @@ input[type="checkbox"] { width: auto; }
  @keyframes backroom-mumble {0%,5%,17%,100%{opacity:0;transform:translate(-50%,4px)}7%,13%{opacity:.85;transform:translate(-50%,0)}}
 }
 @media (prefers-reduced-motion:reduce){.patron-talk{animation:none!important;}}
+
+/* First-person hole cards: close to the viewer on every screen size.
+   One shared card renderer in client.js supplies this tray on all views. */
+#screen-game.active #mobile-hero-cards {
+ display:flex;position:absolute;left:50%;top:auto;bottom:calc(100% - 18px);
+ transform:translateX(-50%);width:max-content;height:auto;min-height:0;
+ align-items:flex-end;justify-content:center;gap:0;z-index:35;pointer-events:none;
+ filter:drop-shadow(0 12px 12px rgba(0,0,0,.75));
+}
+#screen-game.active #action-bar {position:relative;z-index:8;}
+#screen-game.active #mobile-hero-cards:empty {display:none;}
+#screen-game.active #mobile-hero-cards .card {
+ width:clamp(56px,7.5vw,91px);height:clamp(82px,11vw,130px);
+ border-radius:8px;padding:6px 7px;border:1px solid #d2c9b5;
+ box-shadow:0 4px 14px #000b;transform:rotate(-9deg);transform-origin:bottom center;
+}
+#screen-game.active #mobile-hero-cards .card + .card {
+ margin-left:-13px;transform:rotate(9deg);
+}
+#screen-game.active #mobile-hero-cards .card-rank {font-size:clamp(19px,2vw,27px);}
+#screen-game.active #mobile-hero-cards .card-suit {font-size:clamp(25px,2.5vw,35px);}
+#screen-game.active #poker-table .seat.my-seat .seat-cards {display:none;}
+@media screen and (max-width:900px) {
+ #screen-game.active #mobile-hero-cards {bottom:calc(100% - 12px);}
+ #screen-game.active #mobile-hero-cards .card {width:clamp(52px,14vw,74px);height:clamp(75px,20vw,105px);}
+ #screen-game.active #mobile-hero-cards .card-rank {font-size:21px;}
+ #screen-game.active #mobile-hero-cards .card-suit {font-size:28px;}
+}
+@media screen and (max-width:600px) and (orientation:portrait) {
+ #screen-game.active #mobile-hero-cards {top:auto;bottom:calc(100% + 2px);transform:translateX(-50%);}
+ #screen-game.active #mobile-hero-cards .card {width:clamp(52px,16vw,68px);height:clamp(76px,23vw,96px);}
+}
