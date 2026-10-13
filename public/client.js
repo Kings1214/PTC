@@ -649,7 +649,17 @@ function renderTable() {
         .slice(0, 7).map(p => p.seatIndex)
     : [];
   tableEl.classList.toggle('ptc-crowded', featuredSeats.length >= 6);
-  const cast = ['loudmouth', 'grinder', 'slickster', 'silent'];
+  // Seven distinct Back Room regulars in the full-table preview.
+  const cast = ['loudmouth', 'silent', 'ashtray', 'slickster', 'knuckles', 'grinder', 'mickey'];
+  const opponentPositions = {
+    1: [[.50,.09]],
+    2: [[.32,.20],[.68,.20]],
+    3: [[.24,.25],[.50,.09],[.76,.25]],
+    4: [[.18,.31],[.39,.14],[.61,.14],[.82,.31]],
+    5: [[.15,.35],[.32,.18],[.50,.10],[.68,.18],[.85,.35]],
+    6: [[.14,.38],[.29,.23],[.43,.11],[.57,.11],[.71,.23],[.86,.38]],
+    7: [[.14,.40],[.26,.25],[.38,.13],[.50,.08],[.62,.13],[.74,.25],[.86,.40]]
+  };
   for (let seatIdx = 0; seatIdx < maxPlayers; seatIdx++) {
     const relativeSeat = (seatIdx - visualOrigin + maxPlayers) % maxPlayers;
     const angle = (relativeSeat / maxPlayers) * Math.PI * 2 + Math.PI / 2;
@@ -658,15 +668,9 @@ function renderTable() {
     const featuredIndex = featuredSeats.indexOf(seatIdx);
     if (featuredIndex !== -1) {
       const count = featuredSeats.length;
-      const fractions = {
-        1: [.50], 2: [.30, .70], 3: [.19, .50, .81],
-        4: [.14, .38, .62, .86], 5: [.12, .30, .50, .70, .88],
-        6: [.15, .29, .43, .57, .71, .85],
-        7: [.16, .275, .39, .50, .61, .725, .84]
-      }[count];
-      x = tableWidth * fractions[featuredIndex];
-      const isOuter = featuredIndex === 0 || featuredIndex === count - 1;
-      y = tableHeight * (isOuter && count > 1 ? .18 : .10);
+      const position = opponentPositions[count][featuredIndex];
+      x = tableWidth * position[0];
+      y = tableHeight * position[1];
     }
     const seat = document.createElement('div');
     seat.dataset.seat = seatIdx;
@@ -683,7 +687,12 @@ function renderTable() {
     } else {
       seat.className = 'seat';
       if (p.id === mySocketId) seat.classList.add('my-seat');
-      if (featuredIndex !== -1) seat.classList.add('ptc-featured');
+      if (featuredIndex !== -1) {
+        seat.classList.add('ptc-featured');
+        const distanceFromCenter = Math.abs(featuredIndex - (featuredSeats.length - 1) / 2);
+        seat.classList.add(distanceFromCenter >= 2.5 ? 'ptc-near' : distanceFromCenter >= 1.5 ? 'ptc-middle' : 'ptc-far');
+        seat.classList.add(featuredIndex < (featuredSeats.length - 1) / 2 ? 'ptc-left' : featuredIndex > (featuredSeats.length - 1) / 2 ? 'ptc-right' : 'ptc-center');
+      }
       if (currentRoom.gameState.currentPlayerIndex === p.seatIndex && !p.folded && currentRoom.gameState.status === 'playing') {
         seat.classList.add('active');
       }
