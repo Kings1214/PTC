@@ -66,7 +66,13 @@ socket.on('resume-failed', () => {
 });
 
 socket.on('seat-replaced', () => {
-  clearStoredSeat();
+  if (currentRoom?.settings?.gameMode === 'tournament') {
+    // Tournament tabs share localStorage. The new tab may already hold the
+    // freshly rotated token: do NOT erase it or auto-reclaim it from this tab.
+    try { sessionStorage.setItem(SKIP_AUTO_RESUME_KEY, '1'); } catch (_) {}
+  } else {
+    clearStoredSeat();
+  }
   socket.disconnect();
   alert('This seat has been opened in another tab.');
   location.reload();
