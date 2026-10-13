@@ -717,7 +717,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('test-game', (data = {}) => {
-    if (Array.from(rooms.values()).some(r => r.players.has(socket.id))) return;
+    if (roomForSocket(socket.id)) return socket.emit('error-msg', 'Leave your current table first.');
     const fullTable = data && data.fullTable === true;
     const id = generateRoomCode();
     const settings = { smallBlind: 10, bigBlind: 20, maxPlayers: 8, startingChips: 1000, timerSeconds: 20, timerEnabled: false, rebuysAllowed: true };
@@ -741,6 +741,8 @@ io.on('connection', (socket) => {
   });
 
   socket.on('create-room', (data) => {
+    if (roomForSocket(socket.id)) return socket.emit('error-msg', 'Leave your current table first.');
+    if (!data || typeof data !== 'object') return;
     if (!data.nickname || !data.nickname.trim()) return socket.emit('error-msg', 'Enter a nickname');
     const roomId = generateRoomCode();
     const settings = {
@@ -763,6 +765,8 @@ io.on('connection', (socket) => {
   });
   
   socket.on('join-room', (data) => {
+    if (roomForSocket(socket.id)) return socket.emit('error-msg', 'Leave your current table first.');
+    if (!data || typeof data !== 'object') return;
     if (!data.nickname || !data.nickname.trim()) return socket.emit('error-msg', 'Enter a nickname');
     const room = rooms.get(data.roomCode);
     if (!room) return socket.emit('error-msg', 'Room not found');
@@ -781,6 +785,8 @@ io.on('connection', (socket) => {
   });
   
   socket.on('spectate-room', (data) => {
+    if (roomForSocket(socket.id)) return socket.emit('error-msg', 'Leave your current table first.');
+    if (!data || typeof data !== 'object') return;
     if (!data.nickname || !data.nickname.trim()) return socket.emit('error-msg', 'Enter a nickname');
     const room = rooms.get(data.roomCode);
     if (!room) return socket.emit('error-msg', 'Room not found');
