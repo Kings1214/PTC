@@ -72,12 +72,11 @@ class Room {
   }
   
   getPublicState(requestingSocketId = null) {
-    const isSpectator = this.spectators.has(requestingSocketId);
     const players = Array.from(this.players.values()).map(p => {
       let revealCards = false;
       if (this.gameState.bettingRound === 'showdown' && !p.folded) revealCards = true;
       if (p.id === requestingSocketId) revealCards = true;
-      if (isSpectator && !p.folded && this.gameState.status === 'playing') revealCards = true;
+      // Spectators never see live hole cards; only showdown reveals are public.
       return {
         id: p.id,
         name: p.name,
