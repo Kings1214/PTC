@@ -1,0 +1,234 @@
+/* PAY THE COST / THE BACK ROOM
+   Scene Overhaul 01. Isolated theme layer; poker rules and markup remain intact.
+   Room art and portraits are original SVG assets, not CSS silhouettes. */
+
+#screen-game.ptc-backroom .ptc-opponent-portrait > span {display:none;}
+#screen-game.ptc-backroom .ptc-opponent-portrait .ptc-character-art {
+ display:block;width:100%;height:100%;object-fit:contain;user-select:none;pointer-events:none;
+}
+#screen-game.ptc-backroom #poker-table .seat:not(.empty):not(.my-seat) {
+ isolation:isolate;overflow:visible;
+}
+#screen-game.ptc-backroom #poker-table .seat .ptc-opponent-portrait {z-index:0;}
+#screen-game.ptc-backroom #poker-table .seat .seat-cards,
+#screen-game.ptc-backroom #poker-table .seat .seat-name,
+#screen-game.ptc-backroom #poker-table .seat .seat-chips {
+ position:relative;z-index:1;
+}
+
+/* Next hand is now a narrow status/host-action strip in your own controls,
+   never an obstructive popup over community cards. */
+#screen-game.ptc-backroom #action-bar .next-hand-overlay {
+ position:relative;left:auto;top:auto;transform:none;display:block;
+ z-index:15;width:100%;margin:0 auto 9px;
+}
+#screen-game.ptc-backroom #action-bar .next-hand-overlay.hidden {display:none;}
+#screen-game.ptc-backroom #action-bar .next-hand-box {
+ width:100%;max-width:none;padding:7px 11px;
+ display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:7px 13px;
+ border-radius:8px;border:1px solid #876d49;background:linear-gradient(110deg,#171914,#29251b,#171914);
+ box-shadow:inset 0 0 0 1px #0008;text-align:center;
+}
+#screen-game.ptc-backroom #action-bar .next-hand-text {
+ margin:0;color:#d6b77f;font:700 13px Georgia,serif;letter-spacing:.025em;
+}
+#screen-game.ptc-backroom #action-bar #next-hand-countdown {
+ margin:0;font-size:11px;color:#bcb29f;line-height:1.2;
+}
+#screen-game.ptc-backroom #action-bar #btn-next-hand {
+ margin:0;padding:7px 16px;font-size:12px;animation:none;
+ border:1px solid #a68a58;border-radius:7px;
+ background:linear-gradient(#d0a86b,#a27a46);color:#151410;
+ box-shadow:0 2px 8px #0008;
+}
+
+@media screen and (min-width:901px) {
+ #screen-game.ptc-backroom {background:#090907;}
+ #screen-game.ptc-backroom #sidebar {
+   width:154px;padding:13px 11px;
+   background:linear-gradient(105deg,#161612,#0e110e);
+   border-right:1px solid #59452e;z-index:11;
+ }
+ #screen-game.ptc-backroom #table-container {
+   position:relative;min-width:0;overflow:hidden;isolation:isolate;
+   perspective:none;
+   background:
+      radial-gradient(ellipse 50% 60% at 50% 28%,rgba(169,113,56,.12),transparent 80%),
+      linear-gradient(180deg,rgba(0,0,0,.08),rgba(0,0,0,.44)),
+      url('/art/backroom-wall.svg') center top / cover no-repeat,
+      #1b1713;
+ }
+ #screen-game.ptc-backroom #table-container::before {
+   content:"";position:absolute;inset:64px 0 0;z-index:0;pointer-events:none;
+   background:
+      radial-gradient(ellipse 42% 36% at 50% 25%,transparent 30%,rgba(9,8,7,.28) 96%),
+      repeating-linear-gradient(114deg,transparent 0 91px,#d0af7a07 92px 93px,transparent 94px 220px);
+ }
+ #screen-game.ptc-backroom #table-container .backroom-crowd {display:none!important;}
+ #screen-game.ptc-backroom #top-bar {
+   position:relative;height:55px;min-height:55px;z-index:15;
+   padding:7px 20px;background:linear-gradient(#171a15,#11120f);
+   border-bottom:1px solid #604729;box-shadow:0 7px 24px #000a;
+ }
+ #screen-game.ptc-backroom #top-bar::before {
+   content:'PAY THE COST';font:700 23px Georgia,serif;letter-spacing:.075em;
+   color:#b79560;text-shadow:0 2px 7px #000;margin-right:auto;
+ }
+ #screen-game.ptc-backroom #poker-table {
+   position:absolute;flex:none;left:50%;top:auto;bottom:-126px;
+   width:min(122%,1570px);height:clamp(465px,68vh,630px);
+   min-height:0;max-height:none;margin:0!important;
+   transform:translateX(-50%)!important;transform-origin:center center;
+   z-index:2;overflow:visible;
+   border:18px solid #2b1b15;border-radius:49% / 43%;
+   background:
+      radial-gradient(ellipse at 50% 24%,rgba(175,182,104,.14),transparent 52%),
+      repeating-linear-gradient(26deg,transparent 0 4px,#040b0710 5px 6px),
+      radial-gradient(ellipse at 50% 19%,#2e5841 0%,#234936 47%,#0c241d 100%);
+   box-shadow:
+      inset 0 0 0 3px #947344,
+      inset 0 0 0 16px #171714,
+      inset 0 0 90px 40px #07150f,
+      0 0 0 5px #120d0a,
+      0 24px 0 #1b110d,
+      0 48px 48px #000d;
+ }
+ #screen-game.ptc-backroom #poker-table::before {
+   inset:33px;border:2px solid #9e8b5555;border-radius:49% / 43%;
+ }
+ #screen-game.ptc-backroom #poker-table .ptc-felt-logo {
+   display:block;position:absolute;top:66%;left:50%;
+   transform:translate(-50%,-50%);white-space:nowrap;
+   font:700 clamp(18px,2vw,29px) Georgia,serif;letter-spacing:.22em;
+   color:rgba(197,183,133,.14);pointer-events:none;
+ }
+ /* Featured players stand behind the far rail, with live nameplates over it. */
+ #screen-game.ptc-backroom #poker-table .seat.ptc-featured {
+   z-index:4;width:100px;min-height:51px;
+   border:1px solid #a18555;border-radius:10px;padding:6px 4px;
+   background:linear-gradient(165deg,rgba(34,33,26,.98),rgba(11,15,12,.98));
+   box-shadow:0 5px 12px #000a,0 0 0 2px #0008;
+   transform:none;
+ }
+ #screen-game.ptc-backroom #poker-table .seat.ptc-featured .ptc-opponent-portrait {
+   display:block;position:absolute;left:50%;bottom:calc(100% - 7px);
+   width:clamp(188px,18vw,278px);height:clamp(234px,32vh,325px);
+   transform:translateX(-50%);transform-origin:bottom center;
+   opacity:1;z-index:0;filter:drop-shadow(0 12px 12px #000a);
+ }
+ #screen-game.ptc-backroom #poker-table .seat.ptc-featured.active {
+   border-color:#ecd099;box-shadow:0 0 0 2px #c7a66b,0 0 35px #c7a66b55;
+ }
+ #screen-game.ptc-backroom #poker-table .seat.ptc-featured.active .ptc-opponent-portrait {
+   filter:drop-shadow(0 0 18px #cba86966) drop-shadow(0 10px 10px #0009);
+ }
+ #screen-game.ptc-backroom #poker-table .seat.ptc-featured.folded .ptc-opponent-portrait {
+   opacity:.43;filter:grayscale(.8) drop-shadow(0 10px 8px #000c);
+ }
+ #screen-game.ptc-backroom #poker-table .seat.ptc-featured .seat-cards .card {
+   width:22px;height:29px;
+ }
+ #screen-game.ptc-backroom #poker-table .seat.ptc-featured .seat-name {
+   font:700 12px Georgia,serif;color:#e3d7c4;letter-spacing:.02em;
+ }
+ #screen-game.ptc-backroom #poker-table .seat.ptc-featured .seat-chips {
+   color:#d5ae6c;font-size:12px;
+ }
+ #screen-game.ptc-backroom #poker-table .seat.empty {opacity:0;pointer-events:none;}
+ #screen-game.ptc-backroom #poker-table .seat.my-seat {
+   display:none; /* The local player's seat IS the camera. */
+ }
+ #screen-game.ptc-backroom #poker-table .seat:not(.ptc-featured):not(.my-seat):not(.empty) .ptc-opponent-portrait {
+   display:none;
+ }
+ #screen-game.ptc-backroom #community-cards {
+   top:30%;gap:9px;z-index:5;
+   filter:drop-shadow(0 8px 7px #0009);
+ }
+ #screen-game.ptc-backroom #community-cards .card {
+   width:clamp(45px,4.8vw,70px);height:clamp(64px,6.8vw,98px);
+   padding:6px;border-radius:5px;border:1px solid #c6bba7;
+ }
+ #screen-game.ptc-backroom #community-cards .card-rank {font-size:clamp(15px,1.6vw,22px);}
+ #screen-game.ptc-backroom #community-cards .card-suit {font-size:clamp(18px,2vw,27px);}
+ #screen-game.ptc-backroom #pot-display {
+   top:46%;left:50%;z-index:5;transform:translateX(-50%);
+   padding:8px 23px;border-radius:24px;
+   color:#e9c987;font:700 16px Georgia,serif;letter-spacing:.04em;
+   background:linear-gradient(180deg,#0a1814e8,#172820e5);
+   border:1px solid #b19b665e;box-shadow:0 6px 16px #0008;
+ }
+ #screen-game.ptc-backroom #action-bar {
+   position:absolute;left:50%;bottom:12px;right:auto;top:auto;
+   transform:translateX(-50%);width:min(84%,760px);max-width:760px;
+   margin:0;padding:12px 18px 10px;z-index:12;
+   background:linear-gradient(165deg,#30271e,#181c17 47%,#101310);
+   border:2px solid #715437;border-radius:16px 16px 10px 10px;
+   box-shadow:inset 0 1px 0 #d7b07540,0 8px 28px #000c;
+ }
+ #screen-game.ptc-backroom #action-bar .turn-indicator {
+   animation:none;font:700 13px Georgia,serif;letter-spacing:.06em;color:#d9b87c;
+ }
+ #screen-game.ptc-backroom #action-bar .action-status {
+   color:#beb5a3;font-size:12px;
+ }
+ #screen-game.ptc-backroom #action-bar .btn {
+   border-radius:7px;box-shadow:inset 0 1px 0 #ffffff24,0 3px 6px #0009;
+   text-transform:uppercase;letter-spacing:.04em;font-weight:700;
+ }
+ #screen-game.ptc-backroom #action-bar #btn-raise {background:#9e7840;color:#1d1a14;}
+ #screen-game.ptc-backroom #action-bar #btn-allin {background:#775332;color:#fff0d6;}
+ #screen-game.ptc-backroom #action-bar .btn:disabled {opacity:.42;}
+ #screen-game.ptc-backroom #mobile-hero-cards {
+   bottom:calc(100% + 5px);filter:drop-shadow(0 13px 12px #000);
+ }
+ #screen-game.ptc-backroom #mobile-hero-cards .card {
+   width:clamp(66px,7vw,95px);height:clamp(98px,10vw,138px);
+   padding:8px;border-radius:7px;box-shadow:0 6px 20px #000c;
+ }
+ #screen-game.ptc-backroom #mobile-hero-cards .card-rank {font-size:26px;}
+ #screen-game.ptc-backroom #mobile-hero-cards .card-suit {font-size:33px;}
+ /* Waiting/starting game stays unobtrusive and doesn't conceal the cast. */
+ #screen-game.ptc-backroom #start-overlay {
+   top:42%;z-index:9;max-width:320px;
+   border-radius:11px;padding:12px 18px;background:#111813ec;
+   border:1px solid #7c6242;box-shadow:0 9px 25px #000a;
+ }
+ #screen-game.ptc-backroom #start-overlay .btn-start {
+   padding:11px 26px;font:700 14px Georgia,serif;background:#9e7840;
+   color:#17120c;animation:none;
+ }
+ #screen-game.ptc-backroom #win-banner {
+   top:19%;z-index:20;background:linear-gradient(#3b271d,#1b1b15);
+   border:1px solid #b99859;color:#f2d29b;border-radius:8px;
+ }
+}
+@media screen and (min-width:901px) and (max-height:720px) {
+ #screen-game.ptc-backroom #poker-table {bottom:-145px;height:clamp(400px,69vh,535px);}
+ #screen-game.ptc-backroom #poker-table .seat.ptc-featured .ptc-opponent-portrait {
+  height:clamp(190px,29vh,255px);width:clamp(165px,16vw,235px);
+ }
+ #screen-game.ptc-backroom #community-cards {top:29%;}
+ #screen-game.ptc-backroom #pot-display {top:45%;}
+}
+/* The same characters, scaled down without moving playable seat controls on
+   tablets and phones. A full separate camera layout comes in responsive pass. */
+@media screen and (max-width:900px) {
+ #screen-game.ptc-backroom #poker-table .ptc-opponent-portrait {
+   z-index:0;bottom:calc(100% + 2px);width:110px;height:140px;
+   transform:translateX(-50%) scale(.65);transform-origin:bottom center;
+   opacity:.90;filter:drop-shadow(0 5px 7px #000a);
+ }
+}
+@media screen and (max-width:600px) and (orientation:portrait) {
+ #screen-game.ptc-backroom #poker-table .ptc-opponent-portrait {
+   width:105px;height:130px;transform:translateX(-50%) scale(.40);
+   bottom:calc(100% - 2px);
+ }
+ #screen-game.ptc-backroom #action-bar .next-hand-box {gap:5px;padding:7px;}
+ #screen-game.ptc-backroom #action-bar .next-hand-text {font-size:12px;}
+ #screen-game.ptc-backroom #action-bar #btn-next-hand {padding:6px 11px;font-size:11px;}
+}
+@media (prefers-reduced-motion:reduce){
+ #screen-game.ptc-backroom .ptc-opponent-portrait {animation:none!important;}
+}
