@@ -671,7 +671,13 @@ function renderTable() {
         cardsHtml += '<div class="card card-back"></div><div class="card card-back"></div>';
       }
       cardsHtml += '</div>';
+      // Players across the table get distinct back-room character portraits.
+      // The local player's seat stays clear for the first-person view.
+      const opponentPortrait = p.id !== mySocketId
+        ? `<div class="ptc-opponent-portrait character-${p.seatIndex % 4}" aria-hidden="true"><span class="character-shoulders"></span><span class="character-neck"></span><span class="character-face"><i class="character-eyes"></i><i class="character-mouth"></i></span><span class="character-hair"></span></div>`
+        : '';
       seat.innerHTML = `
+        ${opponentPortrait}
         ${cardsHtml}
         <div class="seat-name">${escapeHtml(p.name)}</div>
         <div class="seat-chips">$${p.chips}</div>
