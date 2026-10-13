@@ -247,3 +247,27 @@
  #screen-game.ptc-backroom #ptc-player-name {color:#f2e8d5;font:700 13px Georgia,serif;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
  #screen-game.ptc-backroom #ptc-player-chips {color:#e1bb76;font-size:13px;white-space:nowrap;}
 }
+
+/* Seven active opponents in the eight-player practice room: all visible. */
+@media screen and (min-width:901px) {
+  #screen-game.ptc-backroom #poker-table.ptc-crowded .seat.ptc-featured {
+    width:clamp(73px,7.3vw,93px);
+    padding:4px 3px;min-height:47px;
+  }
+  #screen-game.ptc-backroom #poker-table.ptc-crowded .seat.ptc-featured .ptc-opponent-portrait {
+    width:clamp(140px,14vw,185px);
+    height:clamp(174px,25vh,246px);
+  }
+  #screen-game.ptc-backroom #poker-table.ptc-crowded .seat.ptc-featured .seat-name {
+    font-size:11px;
+  }
+  #screen-game.ptc-backroom #poker-table.ptc-crowded .seat.ptc-featured .seat-cards .card {
+    width:19px;height:25px;
+  }
+  #screen-home .btn-full-table {
+    border-style:solid;background:linear-gradient(120deg,#42321f,#2c281f);border-color:#9b7750;
+  }
+}
+#screen-home .btn-full-table {
+  border-style:solid;background:linear-gradient(120deg,#42321f,#2c281f);border-color:#9b7750;
+}
