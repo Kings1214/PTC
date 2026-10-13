@@ -25,5 +25,13 @@
 <path d="M93 368q-7-32 16-45 26-11 43 11l-9 32m78 0q-3-38-29-42-21-3-35 27l9 31" fill="#b87957" stroke="#211916" stroke-width="8"/>
 <path d="M96 371q18-15 37-6m72 3q24-17 37 1" fill="none" stroke="#65402e" stroke-width="5"/>
 <path d="M25 390Q5 321 35 279q22-37 80-44l28 1h49q64 0 100 43l25 111Z" fill="url(#grain)" stroke="none" opacity=".65"/>
-</g>
-</svg>
+
+<!-- Lou: sneering brows, tattoo, and a gold ring on his reaching hand. -->
+<path d="M118 126l33-8M175 116l35 6" fill="none" stroke="#372019" stroke-width="8"/>
+<path d="M121 147q11 6 24 1m34-1q12 5 24-2" fill="none" stroke="#201b19" stroke-width="5"/>
+<path d="M141 171l10 7m42-8-8 9" fill="none" stroke="#6a3229" stroke-width="5"/>
+<path d="M85 286q6 11 22 6l-4 10q-19 6-24-9Z" fill="#d0a34e" stroke="#5c421d" stroke-width="3"/>
+<path d="M108 346l11 7m-4 6 13-2" stroke="#d4a451" stroke-width="6"/>
+<path d="M58 302q-6 13 1 27m-7-9 17-3" stroke="#a46a4c" stroke-width="5" fill="none"/>
+<circle cx="123" cy="355" r="5" fill="#d6af4c" stroke="#604b22" stroke-width="2"/>
+</g></svg>
