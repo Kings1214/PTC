@@ -636,3 +636,6 @@ input[type="checkbox"] { width: auto; }
  #action-bar .btn-danger {background:#763e3e;}
  #action-bar .btn-allin {background:#a16a31;}
 }
+
+#screen-home .btn-test {background:transparent;color:#e5b869;border:1px dashed #b38a51;}
+#screen-home .btn-test:hover {background:#23382e;}
