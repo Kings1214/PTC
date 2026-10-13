@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 330 390" role="img" aria-label="The Smug Bastard">
+<defs><linearGradient id="cloth" x1="0" y1="0" x2=".9" y2="1"><stop stop-color="#a5484d"/><stop offset=".44" stop-color="#762c31"/><stop offset="1" stop-color="#100f10"/></linearGradient>
+<linearGradient id="face" x1="0" y1="0" x2=".8" y2="1"><stop stop-color="#e0bb99"/><stop offset=".5" stop-color="#b99b83"/><stop offset="1" stop-color="#6e5446"/></linearGradient>
+<linearGradient id="shadow" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#101310"/><stop offset=".5" stop-color="#a5484d"/><stop offset="1" stop-color="#090b09"/></linearGradient>
+<pattern id="grain" width="17" height="19" patternUnits="userSpaceOnUse"><circle cx="4" cy="5" r="1" fill="#100e0c" opacity=".24"/><path d="M10 13l3 2" stroke="#e5c394" stroke-width="1" opacity=".16"/></pattern>
+<filter id="shadowFx"><feDropShadow dx="1" dy="9" stdDeviation="9" flood-color="#000" flood-opacity=".8"/></filter></defs>
+<g filter="url(#shadowFx)" stroke-linejoin="round" stroke-linecap="round">
+<path d="M13 390Q5 321 35 279q22-37 80-44l28 1h49q64 0 100 43l25 111Z" fill="url(#cloth)" stroke="#121113" stroke-width="12"/>
+<path d="M144 223l-27 28 44 87 41-84-29-31Z" fill="#e1d9c6" stroke="#211d1b" stroke-width="7"/>
+<path d="M126 242l36 95-65-44-9-49m115-5-41 98 70-48 8-53" fill="url(#shadow)" stroke="#171516" stroke-width="7"/>
+<path d="M151 221v37q12 16 31-1v-38Z" fill="#6e5446" stroke="#1d1512" stroke-width="7"/>
+<path d="M103 108q-10-25-25-11-12 19 14 46l14-1m120-35q12-25 27-12 13 19-15 46l-12-2" fill="#b99b83" stroke="#2a1b17" stroke-width="7"/>
+<path d="M101 92Q99 27 163 30q66 3 66 68l-7 59q-16 62-58 75-43-13-59-75Z" fill="url(#face)" stroke="#281d19" stroke-width="9"/>
+<path d="M120 105q15-8 31-1m25-2q16-6 33 3" fill="none" stroke="#6e5446" stroke-width="7"/>
+<path d="M120 138q18-6 35 1m23-1q16-6 32-1" fill="none" stroke="#2a221f" stroke-width="5"/>
+<path d="M161 140q-5 26-6 34l11 3" fill="none" stroke="#6e5446" stroke-width="5"/>
+<path d="M137 199q24 10 48-2" fill="none" stroke="#6e5446" stroke-width="4"/>
+<path d="M100 117Q78 65 103 42q20-42 51-25Q194-13 224 37q31 30 2 82l-10-24-10-35q-20-15-30-9-33-4-55 31Z" fill="#b5a38b" stroke="#51473a" stroke-width="8"/>
+<path d="M104 45q57-38 108 3M107 68q38-24 89-9" stroke="#ddd0ae" stroke-width="9" opacity=".75" fill="none"/>
+<g fill="#6c99a2" fill-opacity=".83" stroke="#d3b775" stroke-width="6"><circle cx="136" cy="133" r="23"/><circle cx="190" cy="133" r="23"/></g><path d="M157 132h13" stroke="#b99a52" stroke-width="7"/><path d="M115 132l-20-7m118 7 17-8" stroke="#b99a52" stroke-width="5"/>
+<path d="M139 189q34 3 56-13-9 23-32 24-13 0-24-11Z" fill="#67433e" stroke="#3d2425" stroke-width="4"/><path d="M145 188q26 1 45-8" stroke="#f5e5d3" stroke-width="4"/>
+<path d="M150 251l21 25 18-23" stroke="#be9b4a" stroke-width="10" fill="none"/>
+<path d="M25 380q48-79 92-38l38 42m147-7q-43-83-91-36l-37 42" fill="none" stroke="#a5484d" stroke-width="16" opacity=".55"/>
+<path d="M93 368q-7-32 16-45 26-11 43 11l-9 32m78 0q-3-38-29-42-21-3-35 27l9 31" fill="#b99b83" stroke="#211916" stroke-width="8"/>
+<path d="M96 371q18-15 37-6m72 3q24-17 37 1" fill="none" stroke="#6e5446" stroke-width="5"/>
+<path d="M25 390Q5 321 35 279q22-37 80-44l28 1h49q64 0 100 43l25 111Z" fill="url(#grain)" stroke="none" opacity=".65"/>
+</g>
+</svg>
