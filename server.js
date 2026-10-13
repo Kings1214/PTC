@@ -14,7 +14,7 @@ const rooms = new Map();
 const ROOM_TIMEOUT = 5 * 60 * 1000;
 const RECONNECT_GRACE_MS = 2 * 60 * 1000;
 const isTournament = room => room.settings.gameMode === 'tournament';
-const connectedTournamentPlayers = room => [...room.players.values()].filter(p => !p.disconnected && p.chips > 0 && !p.id.startsWith('demo-'));
+const connectedTournamentPlayers = room => [...room.players.values()].filter(p => !p.disconnected && !p.departing && p.chips > 0 && !p.id.startsWith('demo-'));
 
 class Player {
   constructor(id, name, chips, seatIndex) {
@@ -729,7 +729,9 @@ function removeSeatImmediately(room, socketId) {
   const player = room.players.get(socketId);
   if (player && isTournament(room) && player.chips > 0) {
     player.wasSittingOut = player.isSittingOut;
+    player.departing = true;
     foldForDeparture(room, player);
+    player.departing = false;
     player.disconnected = true;
     if (!player.allIn) player.isSittingOut = false;
     if (player.reconnectTimer) clearTimeout(player.reconnectTimer);
@@ -1191,7 +1193,9 @@ io.on('connection', (socket) => {
     const player = room.players.get(socket.id);
     if (player) {
       player.wasSittingOut = player.isSittingOut;
+      player.departing = true;
       foldForDeparture(room, player);
+      player.departing = false;
       player.disconnected = true;
       // Tournament stacks remain in rotation for blind postings; cash-game
       // absences sit out and expire normally.
