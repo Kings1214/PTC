@@ -48,7 +48,7 @@ function boot() {
     },
     clearTimeout(timer) { if (timer) timer.active = false; }
   };
-  vm.runInNewContext(source + '\n;globalThis.__testExports = { rooms, processAction, calculatePots };', sandbox);
+  vm.runInNewContext(source + '\n;globalThis.__testExports = { rooms, processAction, calculatePots, startHand, endHand };', sandbox);
   const state = sandbox.__testExports;
 
   function connect(id) {
@@ -183,4 +183,110 @@ test('expired reconnect reservations are removed and host can transfer', () => {
   assert.equal(room.players.has('h'), false);
   assert.equal(room.hostId, 'f');
   assert.equal(h.state.rooms.get(room.id), room);
+});
+
+test('tournament departure keeps a funded seat indefinitely and blinds keep posting', () => {
+  const h = boot(), host = h.connect('h'), friend = h.connect('f');
+  const room = h.room(host, { gameMode: 'tournament', startingChips: 150 });
+  assert.equal(room.settings.gameMode, 'tournament');
+  assert.equal(room.settings.rebuysAllowed, false);
+  h.send(friend, 'join-room', { roomCode: room.id, nickname: 'Friend' });
+  const token = h.last(friend, 'seat-resume-token');
+  assert.equal(token.gameMode, 'tournament');
+  h.send(host, 'start-game');
+  const player = room.players.get('f');
+  const startingStack = player.chips;
+  const seat = player.seatIndex;
+  friend.disconnect();
+  assert.equal(player.disconnected, true);
+  assert.equal(player.reconnectTimer, null);
+  assert.equal(player.resumeToken, token.token);
+  const nextHand = h.timers.find(t => t.active && t.ms === 30000);
+  assert.ok(nextHand, 'blind-only tournament hands should be paced');
+  nextHand.callback();
+  assert.ok(player.chips < startingStack, 'absent player must pay blinds');
+  assert.equal(room.players.get('f'), player, 'seat must remain reserved');
+  const returning = h.connect('returned');
+  h.send(returning, 'resume-seat', token);
+  assert.equal(room.players.get('returned'), player);
+  assert.equal(player.seatIndex, seat);
+  assert.equal(player.disconnected, false);
+  assert.equal(player.isSittingOut, false);
+});
+
+test('leaving a tournament table is not a forfeit, unlike leaving a cash game', () => {
+  const h = boot(), host = h.connect('h'), friend = h.connect('f');
+  const room = h.room(host, { gameMode: 'tournament' });
+  h.send(friend, 'join-room', { roomCode: room.id, nickname: 'Friend' });
+  const token = h.last(friend, 'seat-resume-token');
+  let ack = false;
+  h.send(friend, 'leave-room', () => { ack = true; });
+  assert.equal(ack, true);
+  assert.equal(room.players.get('f')?.disconnected, true);
+  assert.equal(room.players.get('f')?.resumeToken, token.token);
+  assert.equal(room.players.get('f')?.reconnectTimer, null);
+  friend.disconnect();
+  const returning = h.connect('f2');
+  h.send(returning, 'resume-seat', token);
+  assert.equal(room.players.get('f2')?.chips, room.settings.startingChips);
+  assert.equal(room.players.get('f2')?.disconnected, false);
+});
+
+test('when everybody is away a tournament pauses until someone reconnects', () => {
+  const h = boot(), host = h.connect('h'), friend = h.connect('f');
+  const room = h.room(host, { gameMode: 'tournament' });
+  const token = h.last(host, 'seat-resume-token');
+  h.send(friend, 'join-room', { roomCode: room.id, nickname: 'Friend' });
+  h.send(host, 'start-game');
+  host.disconnect();
+  friend.disconnect();
+  const pending = h.timers.find(t => t.active && t.ms === 30000);
+  assert.ok(pending);
+  pending.callback();
+  assert.equal(room.gameState.status, 'waiting');
+  assert.equal(room.players.size, 2);
+  const returning = h.connect('new-host');
+  h.send(returning, 'resume-seat', token);
+  assert.equal(room.gameState.status, 'playing');
+  assert.equal(room.players.get('new-host')?.disconnected, false);
+});
+
+test('only chips reaching zero at showdown can eliminate a disconnected tournament player', () => {
+  const h = boot(), host = h.connect('h'), friend = h.connect('f');
+  const room = h.room(host, { gameMode: 'tournament' });
+  h.send(friend, 'join-room', { roomCode: room.id, nickname: 'Friend' });
+  const token = h.last(friend, 'seat-resume-token');
+  friend.disconnect();
+  const p = room.players.get('f'), winner = room.players.get('h');
+  room.gameState.status = 'playing';
+  room.gameState.bettingRound = 'river';
+  p.chips = 0; p.totalBet = 30; p.folded = true;
+  winner.chips = 970; winner.totalBet = 30; winner.folded = false;
+  h.state.endHand(room);
+  assert.equal(room.players.has('f'), false, 'busted player should release seat');
+  assert.equal(p.resumeToken, null, 'busted player should no longer have a return token');
+  assert.equal(winner.chips, 1030, 'every contributed chip must reach the winner');
+  const returning = h.connect('f2');
+  h.send(returning, 'resume-seat', token);
+  assert.ok(returning.events.some(e => e.event === 'resume-failed'));
+});
+
+test('folded blinds still belong in a pot and disconnected blind all-ins stay eligible', () => {
+  const h = boot(), host = h.connect('h'), friend = h.connect('f');
+  const room = h.room(host, { gameMode: 'tournament' });
+  h.send(friend, 'join-room', { roomCode: room.id, nickname: 'Friend' });
+  const pots = h.state.calculatePots([
+    { id: 'small', folded: true, totalBet: 10 },
+    { id: 'big', folded: false, totalBet: 20 }
+  ]);
+  assert.equal(pots.reduce((total, pot) => total + pot.amount, 0), 30);
+  assert.ok(pots.every(pot => pot.eligible.includes('big')));
+  friend.disconnect();
+  const absent = room.players.get('f');
+  absent.chips = 5;
+  h.state.startHand(room);
+  assert.equal(absent.allIn, true, 'blind should put short stack all in');
+  assert.equal(absent.folded, false, 'an all-in player can still win their cards');
+  assert.equal(absent.chips, 0);
+  assert.ok(absent.holeCards.length === 2);
 });
