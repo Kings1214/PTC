@@ -284,12 +284,14 @@ socket.on('public-rooms', (rooms) => {
     const lockIcon = r.hasPassword ? ' [Private]' : '';
     const statusText = r.isPlaying ? ' (In Progress)' : '';
     const fullText = r.playerCount >= r.maxPlayers ? ' (Full)' : '';
+    const gameType = r.gameMode === 'tournament' ? 'Tournament' : 'Cash Game';
+    const registration = r.registrationClosed ? ' · Registration Closed' : '';
     div.innerHTML = `
       <div class="room-info-item">
-        <b>${r.name}${lockIcon}</b><br>
-        <small>${r.playerCount}/${r.maxPlayers} players${statusText}${fullText}</small>
+        <b>${escapeHtml(r.name)}${lockIcon}</b><br>
+        <small>${r.playerCount}/${r.maxPlayers} players · ${gameType}${registration}${statusText}${fullText}</small>
       </div>
-      <button class="btn btn-tiny btn-primary">Join</button>
+      <button class="btn btn-tiny btn-primary">${r.registrationClosed ? 'Spectate' : 'Join'}</button>
     `;
     const openModal = (e) => {
       e.stopPropagation();
@@ -369,8 +371,20 @@ socket.on('game-ended', () => {
 
 socket.on('error-msg', (msg) => alert(msg));
 
+function clearEliminatedTournamentRecovery() {
+  if (currentRoom?.settings?.gameMode !== 'tournament') return;
+  if (currentRoom.gameState.status === 'playing' &&
+      currentRoom.gameState.bettingRound !== 'showdown') return;
+  const me = currentRoom.players.find(p => p.id === mySocketId);
+  if (me && me.chips === 0) {
+    clearStoredSeat();
+    updateTournamentResumeButton();
+  }
+}
+
 socket.on('state-update', (state) => {
   currentRoom = state;
+  clearEliminatedTournamentRecovery();
   renderTable();
   // Update host display in top bar (in case host changed due to disconnect)
   const hostPlayer = state.players.find(p => p.id === state.hostId);
@@ -398,6 +412,7 @@ socket.on('hand-started', (state) => {
 socket.on('hand-ended', (data) => {
   startTimerCountdown(0);
   currentRoom = data.state;
+  clearEliminatedTournamentRecovery();
   renderTable();
   if (data.results.some(r => r.playerId === mySocketId)) playSound('win');
   else playSound('fold');
@@ -692,7 +707,10 @@ function renderSidebar() {
   playersDiv.innerHTML = players.map(p => {
     const isMe = p.id === mySocketId;
     let status = '';
-    if (p.disconnected) status = currentRoom.settings?.gameMode === 'tournament'
+    if (currentRoom.settings?.gameMode === 'tournament' && p.chips === 0 &&
+        (currentRoom.gameState.bettingRound === 'showdown' ||
+         currentRoom.gameState.status === 'waiting')) status = '(eliminated)';
+    else if (p.disconnected) status = currentRoom.settings?.gameMode === 'tournament'
       ? '(away — blinds continue)' : '(disconnected — seat held)';
     else if (p.hasRebought) status = '(rebuying — next hand)';
     else if (p.folded) status = '(folded)';
