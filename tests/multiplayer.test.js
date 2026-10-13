@@ -105,12 +105,14 @@ test('a disconnection holds the same seat/chips; valid token restores and rotate
   host.disconnect();
   assert.equal(room.players.get('old').disconnected, true);
   assert.ok(room.players.get('old').reconnectTimer);
+  // An unmatched blind may correctly be refunded when this hand ends.
+  const stackAfterHandSettles = original.chips;
   const resumed = h.connect('new');
   h.send(resumed, 'resume-seat', token);
   assert.equal(room.players.get('new'), original);
   assert.equal(room.hostId, 'new');
   assert.equal(room.players.get('new').seatIndex, seat);
-  assert.equal(room.players.get('new').chips, chips);
+  assert.equal(room.players.get('new').chips, stackAfterHandSettles);
   assert.notEqual(h.last(resumed, 'seat-resume-token').token, token.token);
   const attempt = h.connect('attacker');
   h.send(attempt, 'resume-seat', token);
@@ -226,9 +228,13 @@ test('leaving a tournament table is not a forfeit, unlike leaving a cash game', 
   assert.equal(room.players.get('f')?.resumeToken, token.token);
   assert.equal(room.players.get('f')?.reconnectTimer, null);
   friend.disconnect();
+  const player = room.players.get('f');
   const returning = h.connect('f2');
   h.send(returning, 'resume-seat', token);
-  assert.equal(room.players.get('f2')?.chips, room.settings.startingChips);
+  assert.equal(room.players.get('f2'), player);
+  // Restoring a waiting tournament may immediately start a hand and deduct
+  // that player's next legitimate blind.
+  assert.ok(player.chips > 0 && player.chips <= room.settings.startingChips);
   assert.equal(room.players.get('f2')?.disconnected, false);
 });
 
