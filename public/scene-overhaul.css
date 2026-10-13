@@ -232,3 +232,18 @@
 @media (prefers-reduced-motion:reduce){
  #screen-game.ptc-backroom .ptc-opponent-portrait {animation:none!important;}
 }
+
+/* My seat lives at the camera, not as another card-sized figure. */
+#screen-game.ptc-backroom #ptc-player-stats {display:none;}
+@media screen and (min-width:901px) {
+ #screen-game.ptc-backroom #ptc-player-stats {
+  display:flex;align-items:center;gap:11px;
+  position:absolute;left:14px;bottom:calc(100% + 12px);
+  z-index:8;max-width:180px;padding:7px 12px;border-radius:9px;
+  background:linear-gradient(#242720,#101611);border:1px solid #826746;
+  box-shadow:0 6px 15px #000b;
+ }
+ #screen-game.ptc-backroom #ptc-player-stats span {color:#a18c69;font:700 9px Georgia,serif;letter-spacing:.11em;white-space:nowrap;}
+ #screen-game.ptc-backroom #ptc-player-name {color:#f2e8d5;font:700 13px Georgia,serif;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+ #screen-game.ptc-backroom #ptc-player-chips {color:#e1bb76;font-size:13px;white-space:nowrap;}
+}
