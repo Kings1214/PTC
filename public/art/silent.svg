@@ -23,5 +23,13 @@
 <path d="M93 368q-7-32 16-45 26-11 43 11l-9 32m78 0q-3-38-29-42-21-3-35 27l9 31" fill="#9a9b88" stroke="#211916" stroke-width="8"/>
 <path d="M96 371q18-15 37-6m72 3q24-17 37 1" fill="none" stroke="#4a4d43" stroke-width="5"/>
 <path d="M25 390Q5 321 35 279q22-37 80-44l28 1h49q64 0 100 43l25 111Z" fill="url(#grain)" stroke="none" opacity=".65"/>
-</g>
-</svg>
+
+<!-- Deadeye: tired shaded eyes, crossed arms, and a stitched cuff. -->
+<path d="M120 128q16-6 34 1m20 1q18-5 33-2" fill="none" stroke="#1a211d" stroke-width="11" opacity=".7"/>
+<path d="M120 149l31 5m28-2 29-5" fill="none" stroke="#252b26" stroke-width="6"/>
+<path d="M141 181q21 3 39-2" fill="none" stroke="#3b3930" stroke-width="4"/>
+<path d="M73 329q61-30 118 20l55 40" fill="none" stroke="#242934" stroke-width="37"/>
+<path d="M262 325q-69-12-112 27l-50 38" fill="none" stroke="#313641" stroke-width="34"/>
+<path d="M65 345q55-27 116 19m87-22q-71-9-129 25" fill="none" stroke="#555967" stroke-width="5" opacity=".65"/>
+<path d="M106 380l15-5 19 13m78-16 17 6 8 11" fill="none" stroke="#c0ba9b" stroke-width="4"/>
+</g></svg>
