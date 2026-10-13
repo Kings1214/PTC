@@ -19,4 +19,13 @@
 <path d="M62 362l60 18m173-17-62 17" stroke="#221a1a" stroke-width="9"/>
 <path d="M87 374l15-7 12 6m117 0 14-8 10 8" stroke="#9b7c52" stroke-width="6" fill="none"/>
 <path d="M115 271l36 77m86-80-41 83" stroke="#a48f78" stroke-width="5" stroke-opacity=".45"/>
+
+<!-- Knuckles: old facial scar, broken nose, massive taped fists and tattoo. -->
+<path d="M207 103l-22 39 8 19" stroke="#f0c29a" stroke-width="5" fill="none"/>
+<path d="M209 104l-22 37 8 19" stroke="#50322b" stroke-width="2" fill="none"/>
+<path d="M177 140l-14 27 22 8" stroke="#442b24" stroke-width="7" fill="none"/>
+<path d="M135 211q42 13 76-5" stroke="#2c201d" stroke-width="7" fill="none"/>
+<path d="M141 263q15-9 34 5m-28 6q15-9 30 4" stroke="#332728" stroke-width="6" fill="none"/>
+<path d="M73 367l51 16m-47-4 47 17m126-29-55 19m53-4-42 17" stroke="#d1b59a" stroke-width="12" stroke-opacity=".85"/>
+<path d="M84 374l29 8m117-4-27 10" stroke="#564d42" stroke-width="4" fill="none"/>
 </g></svg>
