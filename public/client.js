@@ -1,34 +1,67 @@
 const socket = io();
 const SEAT_STORAGE_KEY = 'ptc.seat-resume.v1';
+const SKIP_AUTO_RESUME_KEY = 'ptc.skip-auto-resume.once';
 
 function readStoredSeat() {
-  try {
-    const data = JSON.parse(sessionStorage.getItem(SEAT_STORAGE_KEY) || 'null');
-    return data && typeof data.roomCode === 'string' && typeof data.token === 'string'
-      ? data : null;
-  } catch (_) { return null; }
+  // Cash rooms keep tab-level recovery; tournament seats must survive browser
+  // closes on the same device, so their token is stored more durably.
+  for (const store of [localStorage, sessionStorage]) {
+    try {
+      const data = JSON.parse(store.getItem(SEAT_STORAGE_KEY) || 'null');
+      if (data && typeof data.roomCode === 'string' && typeof data.token === 'string') return data;
+    } catch (_) {}
+  }
+  return null;
 }
 
 function clearStoredSeat() {
   try { sessionStorage.removeItem(SEAT_STORAGE_KEY); } catch (_) {}
+  try { localStorage.removeItem(SEAT_STORAGE_KEY); } catch (_) {}
+}
+
+function updateTournamentResumeButton() {
+  const button = document.getElementById('btn-return-to-tournament');
+  if (!button) return;
+  const saved = readStoredSeat();
+  button.style.display = saved?.gameMode === 'tournament' ? 'block' : 'none';
+}
+
+function returnToTournament() {
+  const seat = readStoredSeat();
+  if (seat && socket.connected) socket.emit('resume-seat', seat);
 }
 
 socket.on('connect', () => {
+  // Leaving the table intentionally goes to the home screen. The player can
+  // press Return to Tournament; closing the browser auto-restores on next visit.
+  try {
+    if (sessionStorage.getItem(SKIP_AUTO_RESUME_KEY) === '1') {
+      sessionStorage.removeItem(SKIP_AUTO_RESUME_KEY);
+      updateTournamentResumeButton();
+      return;
+    }
+  } catch (_) {}
   const previousSeat = readStoredSeat();
   if (previousSeat) socket.emit('resume-seat', previousSeat);
 });
 
 socket.on('seat-resume-token', (data) => {
   if (data && typeof data.roomCode === 'string' && typeof data.token === 'string') {
-    try { sessionStorage.setItem(SEAT_STORAGE_KEY, JSON.stringify(data)); } catch (_) {}
+    clearStoredSeat();
+    try {
+      const store = data.gameMode === 'tournament' ? localStorage : sessionStorage;
+      store.setItem(SEAT_STORAGE_KEY, JSON.stringify(data));
+    } catch (_) {}
+    updateTournamentResumeButton();
   }
 });
 
 socket.on('resume-failed', () => {
   const hadSeat = !!readStoredSeat();
   clearStoredSeat();
+  updateTournamentResumeButton();
   if (hadSeat && !currentRoom) {
-    alert('Your previous seat is no longer available. You can rejoin the room normally.');
+    alert('That seat is no longer available, or the tournament has ended.');
   }
 });
 
@@ -163,6 +196,17 @@ function showScreen(id) {
 // -------------------------
 function startTestGame(fullTable = false) { socket.emit('test-game', { fullTable }); }
 
+function updateHostGameMode() {
+  const tournament = document.getElementById('host-game-mode').value === 'tournament';
+  const rebuy = document.getElementById('host-rebuys');
+  const note = document.getElementById('host-rebuy-note');
+  rebuy.disabled = tournament;
+  rebuy.checked = !tournament;
+  if (note) note.textContent = tournament
+    ? 'Tournament: no rebuys; disconnected players keep their stack and post blinds until eliminated.'
+    : 'Players with 0 chips can buy back in.';
+}
+
 function createRoom() {
   const nickname = document.getElementById('host-nickname').value.trim();
   if (!nickname) return alert('Enter a nickname');
@@ -181,6 +225,7 @@ function createRoom() {
     startingChips: parseInt(document.getElementById('host-chips').value),
     rebuysAllowed: document.getElementById('host-rebuys').checked,
     timerEnabled: document.getElementById('host-timer').checked,
+    gameMode: document.getElementById('host-game-mode').value,
     timerSeconds: parseInt(document.getElementById('host-timer-duration').value) || 20
   });
 }
@@ -260,7 +305,8 @@ socket.on('joined-room', (state) => {
   showScreen('screen-game');
   scheduleWaterDrip();
   renderTable();
-  document.getElementById('room-code-display').innerText = `Room: ${state.id}`;
+  document.getElementById('room-code-display').innerText =
+    (state.settings?.gameMode === 'tournament' ? 'Tournament · ' : '') + 'Room: ' + state.id;
   document.getElementById('host-display').innerText = `| Host: ${state.players.find(p => p.id === state.hostId)?.name || 'N/A'}`;
   updateHostUI();
   updateSpectatorUI();
@@ -640,7 +686,8 @@ function renderSidebar() {
   playersDiv.innerHTML = players.map(p => {
     const isMe = p.id === mySocketId;
     let status = '';
-    if (p.disconnected) status = '(disconnected — seat held)';
+    if (p.disconnected) status = currentRoom.settings?.gameMode === 'tournament'
+      ? '(away — blinds continue)' : '(disconnected — seat held)';
     else if (p.hasRebought) status = '(rebuying — next hand)';
     else if (p.folded) status = '(folded)';
     else if (p.allIn) status = '(all-in)';
@@ -958,6 +1005,23 @@ function sendAllIn() {
 
 function leaveRoom() {
   clearTimeout(dripTimeout);
+  const tournament = currentRoom?.settings?.gameMode === 'tournament';
+  if (tournament) {
+    // Walking away is not a tournament forfeit. Keep the durable resume token,
+    // fold this hand if necessary, and continue posting blinds.
+    try { sessionStorage.setItem(SKIP_AUTO_RESUME_KEY, '1'); } catch (_) {}
+    let completed = false;
+    const finish = () => {
+      if (completed) return;
+      completed = true;
+      socket.disconnect();
+      location.reload();
+    };
+    if (socket.connected) socket.emit('leave-room', finish);
+    else finish();
+    setTimeout(finish, 1000);
+    return;
+  }
   clearStoredSeat();
   if (!socket.connected) { location.reload(); return; }
   let finished = false;
