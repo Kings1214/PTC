@@ -1076,9 +1076,9 @@ io.on('connection', (socket) => {
     }
     const player = room.players.get(socket.id);
     if (player) {
-      player.disconnected = true;
       player.wasSittingOut = player.isSittingOut;
       foldForDeparture(room, player);
+      player.disconnected = true;
       // All-in stacks still contest the pot. Other absent players sit out.
       if (!player.allIn) player.isSittingOut = true;
       if (player.reconnectTimer) clearTimeout(player.reconnectTimer);
