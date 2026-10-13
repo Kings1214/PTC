@@ -111,7 +111,7 @@ function showScreen(id) {
 // -------------------------
 // LOBBY LOGIC
 // -------------------------
-function startTestGame() { socket.emit('test-game'); }
+function startTestGame(fullTable = false) { socket.emit('test-game', { fullTable }); }
 
 function createRoom() {
   const nickname = document.getElementById('host-nickname').value.trim();
@@ -646,8 +646,9 @@ function renderTable() {
         .sort((a, b) =>
           ((a.seatIndex - visualOrigin + maxPlayers) % maxPlayers) -
           ((b.seatIndex - visualOrigin + maxPlayers) % maxPlayers))
-        .slice(0, 5).map(p => p.seatIndex)
+        .slice(0, 7).map(p => p.seatIndex)
     : [];
+  tableEl.classList.toggle('ptc-crowded', featuredSeats.length >= 6);
   const cast = ['loudmouth', 'grinder', 'slickster', 'silent'];
   for (let seatIdx = 0; seatIdx < maxPlayers; seatIdx++) {
     const relativeSeat = (seatIdx - visualOrigin + maxPlayers) % maxPlayers;
@@ -659,7 +660,9 @@ function renderTable() {
       const count = featuredSeats.length;
       const fractions = {
         1: [.50], 2: [.30, .70], 3: [.19, .50, .81],
-        4: [.14, .38, .62, .86], 5: [.12, .30, .50, .70, .88]
+        4: [.14, .38, .62, .86], 5: [.12, .30, .50, .70, .88],
+        6: [.15, .29, .43, .57, .71, .85],
+        7: [.16, .275, .39, .50, .61, .725, .84]
       }[count];
       x = tableWidth * fractions[featuredIndex];
       const isOuter = featuredIndex === 0 || featuredIndex === count - 1;
@@ -818,6 +821,7 @@ function renderTable() {
     : 'waiting';
   amountInput.min = String(Math.min(minimumTotal, availableTotal));
   amountInput.max = String(availableTotal);
+  amountInput.step = String(Math.max(1, Number(currentRoom.settings.bigBlind) || 1));
   amountInput.placeholder = `Min ${minimumTotal}`;
   if (amountInput.dataset.betContext !== contextKey) {
     amountInput.value = availableTotal > 0 ? String(readyAmount) : '';
@@ -854,8 +858,20 @@ function sendAction(action) {
 }
 
 function sendRaise() {
-  const amount = parseInt(document.getElementById('raise-amount').value);
-  if (!amount) return alert('Enter a bet amount');
+  const input = document.getElementById('raise-amount');
+  const amount = Number(input.value);
+  const me = currentRoom?.players.find(p => p.id === mySocketId);
+  if (!me || !Number.isSafeInteger(amount)) return alert('Enter a valid bet amount');
+  const minBet = currentRoom.gameState.currentBet + currentRoom.gameState.minRaise;
+  const maxBet = me.chips + me.currentBet;
+  const step = Math.max(1, Number(currentRoom.settings.bigBlind) || 1);
+  if (amount > maxBet || amount < Math.min(minBet, maxBet)) {
+    return alert('Choose an amount between $' + Math.min(minBet, maxBet) + ' and $' + maxBet);
+  }
+  // The separate All In action is permitted to use an odd last-chip amount.
+  if (amount !== maxBet && (amount - minBet) % step !== 0) {
+    return alert('Increase your bet in $' + step + ' increments');
+  }
   socket.emit('action', { action: 'raise', amount });
   playSound('click');
 }
