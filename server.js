@@ -233,7 +233,10 @@ function calculatePots(players) {
   if (active.length === 0) {
     return [{ amount: allContributors.reduce((s,p)=>s+p.totalBet, 0), eligible: [] }];
   }
-  let levels = [...new Set(active.map(p => p.totalBet))].sort((a,b) => a-b);
+  // Every committed chip belongs in a pot, including small blinds and other
+  // bets from players who folded. Using only active-player bet levels loses
+  // uncalled folded contributions and can falsely eliminate tournament stacks.
+  let levels = [...new Set(allContributors.map(p => p.totalBet))].sort((a,b) => a-b);
   let prevLevel = 0;
   for (let level of levels) {
     let diff = level - prevLevel;
@@ -574,10 +577,19 @@ function endHand(room) {
     evaluated.sort((a,b) => compareHands(b.hand, a.hand));
     const bestEval = evaluated[0].hand;
     const winners = evaluated.filter(e => compareHands(e.hand, bestEval) === 0);
-    const winAmount = Math.floor(pot.amount / winners.length);
-    winners.forEach(w => {
-      w.player.chips += winAmount;
-      results.push({ playerId: w.player.id, amount: winAmount, hand: w.hand.name });
+    // Odd chips in split pots go clockwise from the dealer so every chip is
+    // paid out, even when pot.amount isn't divisible by the number of winners.
+    const orderedWinners = winners.sort((a,b) => {
+      const n = room.settings.maxPlayers;
+      return ((a.player.seatIndex - room.gameState.dealerIndex + n) % n) -
+             ((b.player.seatIndex - room.gameState.dealerIndex + n) % n);
+    });
+    const winAmount = Math.floor(pot.amount / orderedWinners.length);
+    let oddChips = pot.amount % orderedWinners.length;
+    orderedWinners.forEach(w => {
+      const amount = winAmount + (oddChips-- > 0 ? 1 : 0);
+      w.player.chips += amount;
+      results.push({ playerId: w.player.id, amount, hand: w.hand.name });
     });
   });
   broadcastState(room);
