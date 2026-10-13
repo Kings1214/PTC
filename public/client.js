@@ -711,6 +711,7 @@ function renderTable() {
       // The local player's seat stays clear for the first-person view.
       const castIndex = featuredIndex >= 0 ? featuredIndex : relativeSeat - 1;
       const character = cast[((castIndex % cast.length) + cast.length) % cast.length];
+      if (p.id !== mySocketId) seat.classList.add('ptc-character-' + character);
       const opponentPortrait = p.id !== mySocketId
         ? `<div class="ptc-opponent-portrait" aria-hidden="true"><img class="ptc-character-art" src="/art/${character}.svg" alt="" draggable="false"></div>`
         : '';
