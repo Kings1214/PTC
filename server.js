@@ -13,6 +13,8 @@ const PORT = process.env.PORT || 3000;
 const rooms = new Map();
 const ROOM_TIMEOUT = 5 * 60 * 1000;
 const RECONNECT_GRACE_MS = 2 * 60 * 1000;
+const isTournament = room => room.settings.gameMode === 'tournament';
+const connectedTournamentPlayers = room => [...room.players.values()].filter(p => !p.disconnected && p.chips > 0 && !p.id.startsWith('demo-'));
 
 class Player {
   constructor(id, name, chips, seatIndex) {
@@ -30,6 +32,7 @@ class Player {
     this.hasActed = false;
     this.disconnected = false;
     this.hasRebought = false;
+    this.waitingForNextHand = false;
     this.resumeToken = null; // private, never included in public game state
     this.reconnectTimer = null;
     this.wasSittingOut = false;
@@ -275,6 +278,13 @@ function startGame(room) {
 }
 
 function startHand(room) {
+  // When nobody is connected, pause the tournament instead of endlessly
+  // dealing hands and burning blind stacks in the background.
+  if (isTournament(room) && connectedTournamentPlayers(room).length === 0) {
+    room.gameState.status = 'waiting';
+    broadcastState(room);
+    return;
+  }
   room.gameState.handNumber++;
   room.gameState.deck = createDeck();
   shuffleDeck(room.gameState.deck);
@@ -293,9 +303,14 @@ function startHand(room) {
     }
   });
   
-  // Absent players keep their reserved seats but cannot join the next deal.
+  // Cash-game absences sit out. Tournament absences must remain in the
+  // rotation and post their scheduled blinds, even when disconnected.
   Array.from(room.players.values()).forEach(p => {
-    if (p.disconnected) p.isSittingOut = true;
+    if (p.disconnected) p.isSittingOut = !isTournament(room);
+    if (p.waitingForNextHand && !p.disconnected) {
+      p.waitingForNextHand = false;
+      p.isSittingOut = false;
+    }
   });
   // CRITICAL FIX: Reset ALL players' hand state at the start of every hand.
   Array.from(room.players.values()).forEach(p => p.resetForHand());
@@ -335,11 +350,29 @@ function startHand(room) {
       p.holeCards.push(room.gameState.deck.pop());
     }
   }
-  const firstToActIdx = sortedSeats[(sortedSeats.indexOf(bbPlayer.seatIndex) + 1) % sortedSeats.length];
-  room.gameState.currentPlayerIndex = firstToActIdx;
+  if (isTournament(room)) {
+    // Deal and charge blinds first; then automatically fold missing players.
+    // A player whose blind took their final chips is all-in, not folded, and
+    // still has a chance to win the pot.
+    activePlayers.forEach(p => {
+      if (p.disconnected && !p.allIn) {
+        p.folded = true;
+        p.hasActed = true;
+      }
+    });
+  }
+  const actors = activePlayers.filter(p => !p.folded && !p.allIn)
+    .sort((a,b) => a.seatIndex - b.seatIndex);
+  const firstActor = actors.find(p => p.seatIndex > bbPlayer.seatIndex) || actors[0];
+  room.gameState.currentPlayerIndex = firstActor ? firstActor.seatIndex : -1;
   room.players.forEach((_, sid) => io.to(sid).emit('hand-started', room.getPublicState(sid)));
   room.spectators.forEach(sid => io.to(sid).emit('hand-started', room.getPublicState(sid)));
-  startTurnTimer(room);
+  if (isTournament(room) && (activePlayers.filter(p => !p.folded).length <= 1 ||
+      actors.length <= 1)) {
+    checkRoundComplete(room);
+  } else {
+    startTurnTimer(room);
+  }
 }
 
 function postBlind(player, amount) {
@@ -508,8 +541,9 @@ function advanceRound(room) {
     const activePlayers = Array.from(room.players.values()).filter(p => !p.folded && !p.isSittingOut);
     const canActCount = activePlayers.filter(p => !p.allIn).length;
     if (canActCount > 1) {
-      const sortedSeats = activePlayers.map(p => p.seatIndex).sort((a,b) => a-b);
-      const firstToActIdx = sortedSeats[(sortedSeats.indexOf(room.gameState.dealerIndex) + 1) % sortedSeats.length];
+      const sortedSeats = activePlayers.filter(p => !p.allIn)
+        .map(p => p.seatIndex).sort((a,b) => a-b);
+      const firstToActIdx = sortedSeats.find(seat => seat > room.gameState.dealerIndex) || sortedSeats[0];
       room.gameState.currentPlayerIndex = firstToActIdx;
       startTurnTimer(room);
       return;
@@ -552,8 +586,22 @@ function endHand(room) {
   Array.from(room.players.values()).forEach(p => {
     if (p.chips === 0) {
       p.isSittingOut = true;
+      if (isTournament(room)) {
+        // Elimination revokes the ability to reclaim the seat. Never eliminate
+        // earlier, since an all-in player can win chips back at showdown.
+        p.resumeToken = null;
+      }
     }
   });
+  if (isTournament(room)) {
+    for (const p of [...room.players.values()]) {
+      if (p.disconnected && p.chips === 0) {
+        if (p.reconnectTimer) clearTimeout(p.reconnectTimer);
+        room.players.delete(p.id);
+        transferHostIfNeeded(room, p.id);
+      }
+    }
+  }
   // Advance normal rooms too. Never deal until two funded, active players are present.
   if (room._nextHandTimer) clearTimeout(room._nextHandTimer);
   room._nextHandTimer = setTimeout(() => {
@@ -561,7 +609,8 @@ function endHand(room) {
     if (room.gameState.status !== 'playing' || room.gameState.bettingRound !== 'showdown') return;
     processJoinQueue(room);
     const eligible = Array.from(room.players.values()).filter(p => p.chips > 0 && !p.isSittingOut);
-    if (eligible.length < 2) {
+    if (eligible.length < 2 ||
+        (isTournament(room) && connectedTournamentPlayers(room).length === 0)) {
       room.gameState.status = 'waiting';
       broadcastState(room);
       return;
@@ -575,7 +624,8 @@ function endHand(room) {
 // own socket. A room code or nickname is not proof of seat ownership.
 function sendSeatToken(socket, room, player) {
   player.resumeToken = randomBytes(32).toString('hex');
-  socket.emit('seat-resume-token', { roomCode: room.id, token: player.resumeToken });
+  socket.emit('seat-resume-token', { roomCode: room.id, token: player.resumeToken,
+    gameMode: room.settings.gameMode || 'cash' });
 }
 
 function roomForSocket(socketId) {
@@ -620,6 +670,8 @@ function foldForDeparture(room, player) {
 function expireDisconnectedSeat(room, player) {
   if (rooms.get(room.id) !== room ||
       room.players.get(player.id) !== player || !player.disconnected) return;
+  // Tournament seats have NO reconnect time limit while chips remain.
+  if (isTournament(room) && player.chips > 0) return;
   if (player.allIn && !player.folded &&
       room.gameState.status === 'playing' && room.gameState.bettingRound !== 'showdown') {
     // Defer expiry until all-in side pots have been resolved.
@@ -643,6 +695,17 @@ function removeSeatImmediately(room, socketId) {
     room.rebuyRequests.delete(socketId);
   }
   const player = room.players.get(socketId);
+  if (player && isTournament(room) && player.chips > 0) {
+    player.wasSittingOut = player.isSittingOut;
+    foldForDeparture(room, player);
+    player.disconnected = true;
+    if (!player.allIn) player.isSittingOut = false;
+    if (player.reconnectTimer) clearTimeout(player.reconnectTimer);
+    player.reconnectTimer = null;
+    transferHostIfNeeded(room, player.id);
+    broadcastState(room);
+    return;
+  }
   if (player) {
     // A voluntary exit mid-all-in is treated like a disconnection until the
     // hand completes: keeping the chips in the pot is mandatory.
@@ -686,12 +749,12 @@ io.on('connection', (socket) => {
     room.players.delete(oldId);
     player.id = socket.id;
     player.disconnected = false;
-    // If the interrupted hand was folded, that fold remains final. The
-    // restored player becomes eligible again from the NEXT hand.
-    player.isSittingOut = player.wasSittingOut;
+    // A fold in an interrupted hand remains final, but an eligible
+    // tournament player is back in the next deal.
+    player.isSittingOut = isTournament(room) ? player.chips === 0 : player.wasSittingOut;
     player.wasSittingOut = false;
     room.players.set(socket.id, player);
-    if (room.hostId === oldId) room.hostId = socket.id;
+    if (room.hostId === oldId || (isTournament(room) && !room.hostId)) room.hostId = socket.id;
     if (room.rebuyRequests.has(oldId)) {
       const request = room.rebuyRequests.get(oldId);
       room.rebuyRequests.delete(oldId);
@@ -707,6 +770,12 @@ io.on('connection', (socket) => {
     socket.emit('set-spectator', false);
     sendSeatToken(socket, room, player); // rotate token after every successful recovery
     broadcastState(room);
+    if (isTournament(room) && room.gameState.status === 'waiting' &&
+        room.players.size >= 2 && connectedTournamentPlayers(room).length > 0 &&
+        [...room.players.values()].filter(p => p.chips > 0).length >= 2) {
+      startGame(room);
+      broadcastState(room);
+    }
     console.log(`Seat restored: ${room.id}, seat ${player.seatIndex}`);
   });
 
@@ -752,7 +821,9 @@ io.on('connection', (socket) => {
       startingChips: Math.max(1, parseInt(data.startingChips) || 1000),
       timerSeconds: Math.max(5, Math.min(120, parseInt(data.timerSeconds) || 20)),
       timerEnabled: data.timerEnabled !== undefined ? data.timerEnabled : true,
-      rebuysAllowed: data.rebuysAllowed !== undefined ? data.rebuysAllowed : true
+      gameMode: data.gameMode === 'tournament' ? 'tournament' : 'cash',
+      rebuysAllowed: data.gameMode === 'tournament' ? false :
+        (data.rebuysAllowed !== undefined ? data.rebuysAllowed : true)
     };
     const room = new Room(roomId, socket.id, data.roomName || data.nickname, data.password || '', settings);
     const player = new Player(socket.id, data.nickname, settings.startingChips, 0);
@@ -776,6 +847,7 @@ io.on('connection', (socket) => {
     const player = new Player(socket.id, data.nickname, room.settings.startingChips, seatIndex);
     if (room.gameState.status === 'playing') {
       player.isSittingOut = true;
+      player.waitingForNextHand = true;
     }
     room.players.set(socket.id, player);
     socket.join(room.id);
@@ -1023,6 +1095,7 @@ io.on('connection', (socket) => {
         broadcastState(room);
       }
     } else if (data.type === 'edit-chips') {
+      if (isTournament(room)) return;
       // Allow editing when game hasn't started, OR between hands (bettingRound === 'showdown')
       if (room.gameState.status === 'playing' && room.gameState.bettingRound !== 'showdown') return;
       const target = room.players.get(data.playerId);
@@ -1038,12 +1111,14 @@ io.on('connection', (socket) => {
       room.password = data.password;
       socket.emit('state-update', room.getPublicState(socket.id));
     } else if (data.type === 'toggle-rebuys') {
+      if (isTournament(room)) return;
       room.settings.rebuysAllowed = !room.settings.rebuysAllowed;
       broadcastState(room);
     } else if (data.type === 'change-max-players') {
       room.settings.maxPlayers = Math.max(2, Math.min(12, parseInt(data.amount)));
       broadcastState(room);
     } else if (data.type === 'rebuy') {
+      if (isTournament(room)) return;
       const target = room.players.get(data.playerId);
       if (target && target.chips === 0 && room.settings.rebuysAllowed) {
         target.chips = room.settings.startingChips;
@@ -1085,11 +1160,13 @@ io.on('connection', (socket) => {
       player.wasSittingOut = player.isSittingOut;
       foldForDeparture(room, player);
       player.disconnected = true;
-      // All-in stacks still contest the pot. Other absent players sit out.
-      if (!player.allIn) player.isSittingOut = true;
+      // Tournament stacks remain in rotation for blind postings; cash-game
+      // absences sit out and expire normally.
+      if (!player.allIn) player.isSittingOut = !isTournament(room);
       if (player.reconnectTimer) clearTimeout(player.reconnectTimer);
-      player.reconnectTimer = setTimeout(() => expireDisconnectedSeat(room, player),
-        RECONNECT_GRACE_MS);
+      player.reconnectTimer = isTournament(room) && player.chips > 0 ? null :
+        setTimeout(() => expireDisconnectedSeat(room, player), RECONNECT_GRACE_MS);
+      if (isTournament(room)) transferHostIfNeeded(room, player.id);
     }
     broadcastState(room);
   });
