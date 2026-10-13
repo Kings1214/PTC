@@ -393,16 +393,34 @@ function getCurrentPlayer(room) {
 
 function processAction(playerId, action, amount) {
   const room = Array.from(rooms.values()).find(r => r.players.has(playerId));
-  if (!room) return;
+  if (!room || room.gameState.status !== 'playing' ||
+      room.gameState.bettingRound === 'showdown') return;
   const player = room.players.get(playerId);
-  if (player.seatIndex !== room.gameState.currentPlayerIndex) return;
-  if (player.folded || player.allIn) return;
+  if (player.seatIndex !== room.gameState.currentPlayerIndex ||
+      player.folded || player.allIn || player.disconnected) return;
+
+  // Validate before clearing the turn timer. Previously a rejected check or
+  // raise stopped the timer and could leave an entire multiplayer hand stuck.
+  if (!['fold', 'check', 'call', 'raise'].includes(action)) return;
+  if (action === 'check' && player.currentBet < room.gameState.currentBet) {
+    io.to(playerId).emit('error-msg', 'You need to call, raise, or fold.');
+    return;
+  }
+  const maxTotal = player.currentBet + player.chips;
+  const minTotal = room.gameState.currentBet + room.gameState.minRaise;
+  if (action === 'raise' &&
+      (!Number.isSafeInteger(amount) || amount <= room.gameState.currentBet ||
+       amount > maxTotal || (amount < minTotal && amount !== maxTotal))) {
+    io.to(playerId).emit('error-msg', 'Invalid bet. Raise to at least $' +
+      minTotal + ', or go all in.');
+    return;
+  }
+
   clearTurnTimer(room);
   if (action === 'fold') {
     player.folded = true;
     player.hasActed = true;
   } else if (action === 'check') {
-    if (player.currentBet < room.gameState.currentBet) return;
     player.hasActed = true;
   } else if (action === 'call') {
     const callAmount = room.gameState.currentBet - player.currentBet;
@@ -413,24 +431,24 @@ function processAction(playerId, action, amount) {
     if (player.chips === 0) player.allIn = true;
     player.hasActed = true;
   } else if (action === 'raise') {
-    const totalRequired = amount;
-    if (totalRequired <= room.gameState.currentBet) return;
-    const raiseDiff = totalRequired - player.currentBet;
-    if (raiseDiff > player.chips) return;
+    const previousBet = room.gameState.currentBet;
+    const raiseDiff = amount - player.currentBet;
     player.chips -= raiseDiff;
-    player.currentBet = totalRequired;
+    player.currentBet = amount;
     player.totalBet += raiseDiff;
-    const raiseAmount = totalRequired - room.gameState.currentBet;
+    const raiseAmount = amount - previousBet;
     if (raiseAmount >= room.gameState.minRaise) {
       room.gameState.minRaise = raiseAmount;
-      room.gameState.lastRaise = totalRequired;
+      room.gameState.lastRaise = amount;
+      // An undersized all-in increase does not reopen raising to players who
+      // have already acted, unlike a full legal raise.
+      Array.from(room.players.values()).forEach(p => {
+        if (p.id !== player.id && !p.folded && !p.allIn) p.hasActed = false;
+      });
     }
-    room.gameState.currentBet = totalRequired;
+    room.gameState.currentBet = amount;
     if (player.chips === 0) player.allIn = true;
     player.hasActed = true;
-    Array.from(room.players.values()).forEach(p => {
-      if (p.id !== player.id && !p.folded && !p.allIn) p.hasActed = false;
-    });
   }
   checkRoundComplete(room);
 }
@@ -935,6 +953,7 @@ io.on('connection', (socket) => {
   });
   
   socket.on('action', (data) => {
+    if (!data || typeof data.action !== 'string') return;
     const room = Array.from(rooms.values()).find(r => r.players.has(socket.id));
     if (!room) return;
     processAction(socket.id, data.action, data.amount);
