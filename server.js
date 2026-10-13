@@ -243,7 +243,11 @@ function calculatePots(players) {
     let contributors = allContributors.filter(p => p.totalBet >= level);
     let potAmount = diff * contributors.length;
     let eligible = active.filter(p => p.totalBet >= level).map(p => p.id);
-    pots.push({ amount: potAmount, eligible });
+    // Return a truly unmatched overbet to its only contributor instead of
+    // allowing an empty-eligible side pot to swallow that chip balance.
+    const refund = eligible.length === 0 && contributors.length === 1
+      ? contributors[0].id : null;
+    pots.push({ amount: potAmount, eligible, refund });
     prevLevel = level;
   }
   return pots;
@@ -561,6 +565,11 @@ function endHand(room) {
   const activePlayers = Array.from(room.players.values()).filter(p => !p.folded);
   const results = [];
   pots.forEach(pot => {
+    if (pot.refund) {
+      const contributor = room.players.get(pot.refund);
+      if (contributor) contributor.chips += pot.amount;
+      return;
+    }
     if (pot.eligible.length === 0) return;
     const eligiblePlayers = activePlayers.filter(p => pot.eligible.includes(p.id));
     if (eligiblePlayers.length === 0) return;
@@ -629,7 +638,10 @@ function endHand(room) {
     }
     startHand(room);
     broadcastState(room);
-  }, room.id === 'TEST01' ? 10 : 5000);
+  // With only one connected tournament player, allow time between blind-only
+  // hands instead of stripping absent stacks at 12 hands per minute.
+  }, room.id === 'TEST01' ? 10 :
+       (isTournament(room) && connectedTournamentPlayers(room).length < 2 ? 30000 : 5000));
 }
 
 // Tokens are kept server-side on the player object and delivered ONLY to their
@@ -892,7 +904,8 @@ io.on('connection', (socket) => {
         playerCount: r.players.size,
         maxPlayers: r.settings.maxPlayers,
         isPlaying: r.gameState.status === 'playing',
-        hasPassword: !!r.password
+        hasPassword: !!r.password,
+        gameMode: r.settings.gameMode || 'cash'
       }));
     socket.emit('public-rooms', allRooms);
   });
