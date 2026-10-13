@@ -594,3 +594,18 @@ input[type="checkbox"] { width: auto; }
  #mobile-hero-cards {top:-75px;height:75px}
  #mobile-hero-cards .card {width:44px;height:65px}
 }
+
+/* Pay the Cost — premium lobby presentation */
+#screen-home { background: radial-gradient(ellipse at 50% 38%, #1b3c31 0%, #0c1916 50%, #080e0d 100%); position:relative; isolation:isolate; }
+#screen-home::before { content:""; position:absolute; inset:22px; border:1px solid rgba(229,184,105,.16); border-radius:18px; pointer-events:none; }
+#screen-home .home-container { width:min(90vw,530px); padding:52px 28px; border:1px solid rgba(229,184,105,.32); border-radius:22px; background:linear-gradient(155deg,rgba(24,52,43,.9),rgba(9,23,19,.94)); box-shadow:0 30px 100px rgba(0,0,0,.45), inset 0 1px rgba(255,255,255,.05); }
+#screen-home .home-eyebrow { color:#e5b869; font-size:11px; letter-spacing:.33em; font-weight:700; margin-bottom:24px; }
+#screen-home .logo { font-family:Georgia,serif; font-size:clamp(2.5rem,7vw,4.5rem); line-height:1.06; font-weight:500; letter-spacing:-.055em; margin-bottom:18px; color:#f4efe6; }
+#screen-home .logo span { color:#e5b869; }
+#screen-home .tagline { color:#a8bdb2; font-size:clamp(.85rem,2vw,1rem); margin-bottom:34px; }
+#screen-home .menu-buttons { width:min(100%,310px); gap:12px; }
+#screen-home .menu-buttons .btn { padding:15px 20px; border-radius:9px; letter-spacing:.03em; transition:background .2s,transform .15s,border-color .2s; }
+#screen-home .btn-primary { background:#e5b869; color:#102019; }
+#screen-home .btn-secondary { background:#18372d; border:1px solid #668a71; color:#f4efe6; }
+#screen-home .btn-tertiary { background:transparent; border:1px solid rgba(229,184,105,.34); color:#d9c9a9; }
+@media(max-width:480px) { #screen-home::before {inset:10px;} #screen-home .home-container {padding:40px 22px;} }
