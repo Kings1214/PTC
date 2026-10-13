@@ -271,3 +271,37 @@
 #screen-home .btn-full-table {
   border-style:solid;background:linear-gradient(120deg,#42321f,#2c281f);border-color:#9b7750;
 }
+
+/* Scene Overhaul 2: seven opponents positioned along the far rail in depth,
+   instead of shoulder-to-shoulder like a lineup. */
+@media screen and (min-width:901px) {
+  #screen-game.ptc-backroom #poker-table .seat.ptc-featured.ptc-far {z-index:4;}
+  #screen-game.ptc-backroom #poker-table .seat.ptc-featured.ptc-middle {z-index:6;}
+  #screen-game.ptc-backroom #poker-table .seat.ptc-featured.ptc-near {z-index:8;}
+  #screen-game.ptc-backroom #poker-table .seat.ptc-featured.ptc-left .ptc-character-art {
+    transform:rotate(-4deg);
+    transform-origin:50% 95%;
+  }
+  #screen-game.ptc-backroom #poker-table .seat.ptc-featured.ptc-right .ptc-character-art {
+    transform:rotate(4deg);
+    transform-origin:50% 95%;
+  }
+  #screen-game.ptc-backroom #poker-table .seat.ptc-featured.ptc-far .ptc-opponent-portrait {
+    filter:brightness(.76) drop-shadow(0 7px 7px #000b);
+  }
+  #screen-game.ptc-backroom #poker-table .seat.ptc-featured.ptc-middle .ptc-opponent-portrait {
+    filter:brightness(.93) drop-shadow(0 9px 9px #000b);
+  }
+  #screen-game.ptc-backroom #poker-table .seat.ptc-featured.ptc-near .ptc-opponent-portrait {
+    filter:brightness(1.07) drop-shadow(0 15px 13px #000c);
+  }
+  #screen-game.ptc-backroom #poker-table.ptc-crowded .seat.ptc-featured.ptc-near .ptc-opponent-portrait {
+    width:clamp(176px,15.5vw,218px);height:clamp(213px,29vh,281px);
+  }
+  #screen-game.ptc-backroom #poker-table.ptc-crowded .seat.ptc-featured.ptc-middle .ptc-opponent-portrait {
+    width:clamp(158px,14.5vw,196px);height:clamp(197px,26vh,258px);
+  }
+  #screen-game.ptc-backroom #poker-table.ptc-crowded .seat.ptc-featured.ptc-far .ptc-opponent-portrait {
+    width:clamp(145px,13.2vw,175px);height:clamp(186px,24vh,239px);
+  }
+}
