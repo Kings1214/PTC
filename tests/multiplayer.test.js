@@ -296,3 +296,24 @@ test('folded blinds still belong in a pot and disconnected blind all-ins stay el
   assert.equal(absent.chips, 0);
   assert.ok(absent.holeCards.length === 2);
 });
+
+test('busted players cannot register a fresh tournament seat after play begins', () => {
+  const h = boot(), host = h.connect('h'), player = h.connect('p');
+  const room = h.room(host, { gameMode: 'tournament' });
+  h.send(player, 'join-room', { roomCode: room.id, nickname: 'Player' });
+  const token = h.last(player, 'seat-resume-token');
+  h.send(host, 'start-game');
+  const newcomer = h.connect('new');
+  h.send(newcomer, 'join-room', { roomCode: room.id, nickname: 'New Identity' });
+  assert.equal(room.players.has('new'), false);
+  assert.ok(newcomer.events.some(e => e.event === 'error-msg'));
+  const spectator = h.connect('watcher');
+  h.send(spectator, 'spectate-room', { roomCode: room.id, nickname: 'Watcher' });
+  h.send(spectator, 'request-join');
+  assert.equal(room.joinRequests.has('watcher'), false);
+  // Funded original player still has permission to reclaim their own seat.
+  player.disconnect();
+  const returning = h.connect('same-player');
+  h.send(returning, 'resume-seat', token);
+  assert.ok(room.players.has('same-player'));
+});
