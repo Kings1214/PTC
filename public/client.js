@@ -1,4 +1,54 @@
 const socket = io();
+const SEAT_STORAGE_KEY = 'ptc.seat-resume.v1';
+
+function readStoredSeat() {
+  try {
+    const data = JSON.parse(sessionStorage.getItem(SEAT_STORAGE_KEY) || 'null');
+    return data && typeof data.roomCode === 'string' && typeof data.token === 'string'
+      ? data : null;
+  } catch (_) { return null; }
+}
+
+function clearStoredSeat() {
+  try { sessionStorage.removeItem(SEAT_STORAGE_KEY); } catch (_) {}
+}
+
+socket.on('connect', () => {
+  const previousSeat = readStoredSeat();
+  if (previousSeat) socket.emit('resume-seat', previousSeat);
+});
+
+socket.on('seat-resume-token', (data) => {
+  if (data && typeof data.roomCode === 'string' && typeof data.token === 'string') {
+    try { sessionStorage.setItem(SEAT_STORAGE_KEY, JSON.stringify(data)); } catch (_) {}
+  }
+});
+
+socket.on('resume-failed', () => {
+  const hadSeat = !!readStoredSeat();
+  clearStoredSeat();
+  if (hadSeat && !currentRoom) {
+    alert('Your previous seat is no longer available. You can rejoin the room normally.');
+  }
+});
+
+socket.on('seat-replaced', () => {
+  clearStoredSeat();
+  socket.disconnect();
+  alert('This seat has been opened in another tab.');
+  location.reload();
+});
+
+socket.on('disconnect', () => {
+  if (!currentRoom) return;
+  const status = document.getElementById('action-status');
+  if (status) status.textContent = 'Connection lost — reconnecting to your seat…';
+  ['btn-fold','btn-check','btn-call','btn-raise','btn-allin'].forEach(id => {
+    const button = document.getElementById(id);
+    if (button) button.disabled = true;
+  });
+});
+
 let currentRoom = null;
 let mySocketId = null;
 let isSpectator = false;
@@ -206,6 +256,7 @@ socket.on('public-rooms', (rooms) => {
 socket.on('joined-room', (state) => {
   currentRoom = state;
   mySocketId = socket.id;
+  isSpectator = !state.players.some(p => p.id === socket.id);
   showScreen('screen-game');
   scheduleWaterDrip();
   renderTable();
@@ -217,6 +268,7 @@ socket.on('joined-room', (state) => {
 
 socket.on('set-spectator', (val) => {
   isSpectator = val;
+  if (val) clearStoredSeat();
   updateSpectatorUI();
 });
 
@@ -257,6 +309,7 @@ socket.on('rebuy-result', (data) => {
 });
 
 socket.on('game-ended', () => {
+  clearStoredSeat();
   alert('The host has ended the game.');
   socket.disconnect();
   location.reload();
@@ -341,6 +394,7 @@ socket.on('emoji-received', (data) => {
 });
 
 socket.on('kicked', (data) => {
+  clearStoredSeat();
   if (data && data.toSpectator) {
     // Kicked from player to spectator — stay in the room as a spectator
     alert('You have been moved to spectators by the host.');
@@ -586,7 +640,8 @@ function renderSidebar() {
   playersDiv.innerHTML = players.map(p => {
     const isMe = p.id === mySocketId;
     let status = '';
-    if (p.hasRebought) status = '(rebuying — next hand)';
+    if (p.disconnected) status = '(disconnected — seat held)';
+    else if (p.hasRebought) status = '(rebuying — next hand)';
     else if (p.folded) status = '(folded)';
     else if (p.allIn) status = '(all-in)';
     else if (p.isSittingOut) status = '(sitting out)';
@@ -895,8 +950,17 @@ function sendAllIn() {
 
 function leaveRoom() {
   clearTimeout(dripTimeout);
-  socket.disconnect();
-  location.reload();
+  clearStoredSeat();
+  if (!socket.connected) { location.reload(); return; }
+  let finished = false;
+  const finish = () => {
+    if (finished) return;
+    finished = true;
+    socket.disconnect();
+    location.reload();
+  };
+  socket.emit('leave-room', finish); // explicit exit frees seat immediately
+  setTimeout(finish, 1000); // fallback if the server is unreachable
 }
 
 // -------------------------
