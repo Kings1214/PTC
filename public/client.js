@@ -632,8 +632,13 @@ function renderTable() {
   const maxPlayers = currentRoom.settings.maxPlayers;
   const seatMap = {};
   currentRoom.players.forEach(p => { seatMap[p.seatIndex] = p; });
+  // Rotate the visual seating around the local player: your chair is always
+  // nearest the camera (6 o'clock), without changing actual seat indices.
+  const mySeatIndex = currentRoom.players.find(p => p.id === mySocketId)?.seatIndex;
+  const visualOrigin = mySeatIndex ?? 0;
   for (let seatIdx = 0; seatIdx < maxPlayers; seatIdx++) {
-    const angle = (seatIdx / maxPlayers) * Math.PI * 2 - Math.PI / 2;
+    const relativeSeat = (seatIdx - visualOrigin + maxPlayers) % maxPlayers;
+    const angle = (relativeSeat / maxPlayers) * Math.PI * 2 + Math.PI / 2;
     const x = cx + rx * Math.cos(angle);
     const y = cy + ry * Math.sin(angle);
     const seat = document.createElement('div');
