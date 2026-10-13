@@ -254,6 +254,9 @@ function calculatePots(players) {
 }
 
 function processJoinQueue(room) {
+  // Closing registration after the first deal prevents eliminated players
+  // from creating another identity and re-entering with fresh chips.
+  if (isTournament(room) && room.gameState.handNumber > 0) return;
   if (room.joinQueue.length === 0) return;
   const usedSeats = new Set(Array.from(room.players.values()).map(p => p.seatIndex));
   const availableSeats = [];
@@ -876,6 +879,10 @@ io.on('connection', (socket) => {
     const room = rooms.get(data.roomCode);
     if (!room) return socket.emit('error-msg', 'Room not found');
     if (room.password && room.password !== data.password) return socket.emit('error-msg', 'Incorrect password');
+    if (isTournament(room) && room.gameState.handNumber > 0) {
+      return socket.emit('error-msg',
+        'Tournament registration is closed. Existing players may use Return to Tournament.');
+    }
     if (room.players.size >= room.settings.maxPlayers) return socket.emit('error-msg', 'Room is full');
     const seatIndex = Array.from({length: room.settings.maxPlayers}, (_, i) => i).find(i => !Array.from(room.players.values()).some(p => p.seatIndex === i));
     const player = new Player(socket.id, data.nickname, room.settings.startingChips, seatIndex);
@@ -915,7 +922,8 @@ io.on('connection', (socket) => {
         maxPlayers: r.settings.maxPlayers,
         isPlaying: r.gameState.status === 'playing',
         hasPassword: !!r.password,
-        gameMode: r.settings.gameMode || 'cash'
+        gameMode: r.settings.gameMode || 'cash',
+        registrationClosed: isTournament(r) && r.gameState.handNumber > 0
       }));
     socket.emit('public-rooms', allRooms);
   });
@@ -956,6 +964,9 @@ io.on('connection', (socket) => {
   socket.on('request-join', () => {
     const room = Array.from(rooms.values()).find(r => r.spectators.has(socket.id));
     if (!room) return;
+    if (isTournament(room) && room.gameState.handNumber > 0) {
+      return socket.emit('error-msg', 'Tournament registration is closed.');
+    }
     if (!room.joinRequests.has(socket.id)) {
       room.joinRequests.set(socket.id, { name: room.spectatorNames.get(socket.id) || 'Spectator', approved: false });
     }
@@ -975,6 +986,7 @@ io.on('connection', (socket) => {
   socket.on('accept-join', (data) => {
     const room = Array.from(rooms.values()).find(r => r.hostId === socket.id);
     if (!room) return;
+    if (isTournament(room) && room.gameState.handNumber > 0) return;
     const req = room.joinRequests.get(data.spectatorId);
     if (req) {
       req.approved = true;
