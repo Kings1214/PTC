@@ -545,15 +545,19 @@ function endHand(room) {
 io.on('connection', (socket) => {
   console.log(`User connected: ${socket.id}`);
   
-  socket.on('test-game', () => {
+  socket.on('test-game', (data = {}) => {
     if (Array.from(rooms.values()).some(r => r.players.has(socket.id))) return;
+    const fullTable = data && data.fullTable === true;
     const id = generateRoomCode();
     const settings = { smallBlind: 10, bigBlind: 20, maxPlayers: 8, startingChips: 1000, timerSeconds: 20, timerEnabled: false, rebuysAllowed: true };
-    const room = new Room(id, socket.id, 'Practice Table', '', settings);
+    const room = new Room(id, socket.id, fullTable ? 'Full Back Room' : 'Practice Table', '', settings);
     room.isDemo = true;
     room.players.set(socket.id, new Player(socket.id, 'You', 1000, 0));
-    for (let i = 1; i <= 3; i++) {
-      const bot = new Player('demo-' + id + '-' + i, 'Bot ' + i, 1000, i * 2);
+    const names = ['Greasy Lou', 'Deadeye', 'Ashtray Al', 'Silk', 'Knuckles', 'The Grinder', 'Mickey Mouth'];
+    const count = fullTable ? 7 : 3;
+    for (let i = 1; i <= count; i++) {
+      const index = fullTable ? i : i * 2;
+      const bot = new Player('demo-' + id + '-' + i, fullTable ? names[i - 1] : 'Bot ' + i, 1000, index);
       room.players.set(bot.id, bot);
     }
     rooms.set(id, room);
