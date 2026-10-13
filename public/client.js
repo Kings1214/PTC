@@ -761,6 +761,7 @@ function renderTable() {
   document.getElementById('btn-check').disabled = disableActions || (currentRoom.gameState.currentBet > (me?.currentBet || 0));
   document.getElementById('btn-call').disabled = disableActions || (currentRoom.gameState.currentBet === (me?.currentBet || 0));
   document.getElementById('btn-raise').disabled = disableActions;
+  document.getElementById('btn-raise').innerText = currentRoom.gameState.currentBet === 0 ? 'Bet' : 'Raise';
   document.getElementById('btn-allin').disabled = disableActions;
   const callAmount = currentRoom.gameState.currentBet - (me?.currentBet || 0);
   const actualCall = Math.min(callAmount, me?.chips || 0);
@@ -768,7 +769,7 @@ function renderTable() {
   if (isMyTurn) {
     const minRaise = currentRoom.gameState.currentBet + currentRoom.gameState.minRaise;
     document.getElementById('raise-amount').min = minRaise;
-    document.getElementById('raise-amount').placeholder = `Min $${minRaise}`;
+    document.getElementById('raise-amount').placeholder = `Min ${minRaise}`;
   } else {
     document.getElementById('raise-amount').placeholder = 'Amt';
   }
@@ -804,7 +805,7 @@ function sendAction(action) {
 
 function sendRaise() {
   const amount = parseInt(document.getElementById('raise-amount').value);
-  if (!amount) return alert('Enter a raise amount');
+  if (!amount) return alert('Enter a bet amount');
   socket.emit('action', { action: 'raise', amount });
   playSound('click');
 }
