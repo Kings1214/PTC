@@ -624,7 +624,7 @@ function renderTable() {
   const tableWidth = tableEl.offsetWidth;
   const tableHeight = tableEl.offsetHeight;
   const portrait = window.matchMedia('(max-width: 600px) and (orientation: portrait)').matches;
-  const seatWidth = portrait ? Math.min(96, Math.max(64, tableWidth * 0.22)) : 85;
+  const seatWidth = portrait ? Math.min(96, Math.max(64, tableWidth * 0.22)) : (window.innerWidth >= 901 ? 100 : 85);
   const seatHeight = portrait ? 65 : 70;
   const rx = portrait ? Math.max(0, (tableWidth - seatWidth) / 2 - 18) : tableWidth * 0.42;
   const ry = portrait ? Math.max(0, (tableHeight - seatHeight) / 2 - 22) : tableHeight * 0.38;
@@ -637,11 +637,34 @@ function renderTable() {
   // nearest the camera (6 o'clock), without changing actual seat indices.
   const mySeatIndex = currentRoom.players.find(p => p.id === mySocketId)?.seatIndex;
   const visualOrigin = mySeatIndex ?? 0;
+  const cinematic = window.matchMedia('(min-width: 901px)').matches;
+  // Actual opponents occupy the far side of the scene; name, stack and turn
+  // status remain bound to real players, not to background decoration.
+  const featuredSeats = cinematic
+    ? currentRoom.players
+        .filter(p => p.id !== mySocketId && !p.isSittingOut)
+        .sort((a, b) =>
+          ((a.seatIndex - visualOrigin + maxPlayers) % maxPlayers) -
+          ((b.seatIndex - visualOrigin + maxPlayers) % maxPlayers))
+        .slice(0, 5).map(p => p.seatIndex)
+    : [];
+  const cast = ['loudmouth', 'grinder', 'slickster', 'silent'];
   for (let seatIdx = 0; seatIdx < maxPlayers; seatIdx++) {
     const relativeSeat = (seatIdx - visualOrigin + maxPlayers) % maxPlayers;
     const angle = (relativeSeat / maxPlayers) * Math.PI * 2 + Math.PI / 2;
-    const x = cx + rx * Math.cos(angle);
-    const y = cy + ry * Math.sin(angle);
+    let x = cx + rx * Math.cos(angle);
+    let y = cy + ry * Math.sin(angle);
+    const featuredIndex = featuredSeats.indexOf(seatIdx);
+    if (featuredIndex !== -1) {
+      const count = featuredSeats.length;
+      const fractions = {
+        1: [.50], 2: [.30, .70], 3: [.19, .50, .81],
+        4: [.14, .38, .62, .86], 5: [.12, .30, .50, .70, .88]
+      }[count];
+      x = tableWidth * fractions[featuredIndex];
+      const isOuter = featuredIndex === 0 || featuredIndex === count - 1;
+      y = tableHeight * (isOuter && count > 1 ? .18 : .10);
+    }
     const seat = document.createElement('div');
     seat.dataset.seat = seatIdx;
     seat.style.left = (x - seatWidth / 2) + 'px';
@@ -657,6 +680,7 @@ function renderTable() {
     } else {
       seat.className = 'seat';
       if (p.id === mySocketId) seat.classList.add('my-seat');
+      if (featuredIndex !== -1) seat.classList.add('ptc-featured');
       if (currentRoom.gameState.currentPlayerIndex === p.seatIndex && !p.folded && currentRoom.gameState.status === 'playing') {
         seat.classList.add('active');
       }
@@ -673,8 +697,10 @@ function renderTable() {
       cardsHtml += '</div>';
       // Players across the table get distinct back-room character portraits.
       // The local player's seat stays clear for the first-person view.
+      const castIndex = featuredIndex >= 0 ? featuredIndex : relativeSeat - 1;
+      const character = cast[((castIndex % cast.length) + cast.length) % cast.length];
       const opponentPortrait = p.id !== mySocketId
-        ? `<div class="ptc-opponent-portrait character-${p.seatIndex % 4}" aria-hidden="true"><span class="character-shoulders"></span><span class="character-neck"></span><span class="character-face"><i class="character-eyes"></i><i class="character-mouth"></i></span><span class="character-hair"></span></div>`
+        ? `<div class="ptc-opponent-portrait" aria-hidden="true"><img class="ptc-character-art" src="/art/${character}.svg" alt="" draggable="false"></div>`
         : '';
       seat.innerHTML = `
         ${opponentPortrait}
