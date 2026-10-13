@@ -942,9 +942,17 @@ function sendRaise() {
 }
 
 function sendAllIn() {
-  const me = currentRoom.players.find(p => p.id === mySocketId);
+  const me = currentRoom?.players.find(p => p.id === mySocketId);
   if (!me) return;
-  socket.emit('action', { action: 'raise', amount: me.chips + me.currentBet });
+  const allInTotal = me.chips + me.currentBet;
+  const amountToCall = currentRoom.gameState.currentBet;
+  // A short stack that cannot cover a call must make an all-in CALL, not a
+  // raise; the server will commit only their remaining chips.
+  if (allInTotal <= amountToCall) {
+    socket.emit('action', { action: 'call' });
+  } else {
+    socket.emit('action', { action: 'raise', amount: allInTotal });
+  }
   playSound('click');
 }
 
