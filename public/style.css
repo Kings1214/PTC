@@ -639,3 +639,5 @@ input[type="checkbox"] { width: auto; }
 
 #screen-home .btn-test {background:transparent;color:#e5b869;border:1px dashed #b38a51;}
 #screen-home .btn-test:hover {background:#23382e;}
+
+#screen-home .btn-viewport{display:block;text-decoration:none;background:#1b3028;color:#e5b869;border:1px solid #6e6148;text-align:center;}
