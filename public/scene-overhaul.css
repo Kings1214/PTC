@@ -305,3 +305,69 @@
     width:clamp(145px,13.2vw,175px);height:clamp(186px,24vh,239px);
   }
 }
+
+/* Scene Overhaul 3: the cast does not sit in identical poses.
+   Personality is tied to occupied player seats; visuals never change card logic. */
+@media screen and (min-width:901px) {
+  #screen-game.ptc-backroom #poker-table .seat.ptc-featured .ptc-character-art {
+    transform-origin:50% 87%;
+    backface-visibility:hidden;
+    animation:ptc-breathe 10s ease-in-out infinite;
+  }
+  /* Lou talks with his body, shoving his shoulder and cigarette toward you. */
+  #screen-game.ptc-backroom #poker-table .seat.ptc-character-loudmouth .ptc-character-art {
+    --ptc-stance: translate(5px,12px) rotate(-11deg) scale(1.13);
+    animation-duration:8.5s;
+  }
+  /* Deadeye is withdrawn and turned toward the cards, rarely looking up. */
+  #screen-game.ptc-backroom #poker-table .seat.ptc-character-silent .ptc-character-art {
+    --ptc-stance: translate(8px,14px) rotate(8deg) skewX(-3deg) scale(.96);
+    animation-duration:14s;animation-delay:-4s;
+  }
+  /* Ashtray leans across the rail like the smoke is more interesting than you. */
+  #screen-game.ptc-backroom #poker-table .seat.ptc-character-ashtray .ptc-character-art {
+    --ptc-stance: translate(-9px,18px) rotate(-7deg) scale(1.09);
+    animation-duration:11s;animation-delay:-6s;
+  }
+  /* Silk is unnervingly upright, chin raised, shoulders turned aside. */
+  #screen-game.ptc-backroom #poker-table .seat.ptc-character-slickster .ptc-character-art {
+    --ptc-stance: translate(3px,-8px) rotate(6deg) skewX(2deg) scale(.99);
+    animation-duration:13s;animation-delay:-8s;
+  }
+  /* Knuckles occupies more space; broad shoulders and a forward hunch. */
+  #screen-game.ptc-backroom #poker-table .seat.ptc-character-knuckles .ptc-character-art {
+    --ptc-stance: translate(-2px,17px) rotate(-4deg) scale(1.18);
+    animation-duration:9.5s;animation-delay:-3s;
+  }
+  /* The Grinder is slumped, guarding his hand and looking down. */
+  #screen-game.ptc-backroom #poker-table .seat.ptc-character-grinder .ptc-character-art {
+    --ptc-stance: translate(8px,21px) rotate(9deg) skewX(-5deg) scale(.94);
+    animation-duration:15.5s;animation-delay:-9s;
+  }
+  /* Mickey never sits still; big toothy grin and a crooked lean. */
+  #screen-game.ptc-backroom #poker-table .seat.ptc-character-mickey .ptc-character-art {
+    --ptc-stance: translate(-8px,5px) rotate(-10deg) scale(1.08);
+    animation-duration:7.8s;animation-delay:-2s;
+  }
+  @keyframes ptc-breathe {
+    0%,100% { transform:var(--ptc-stance,none) translateY(0); }
+    40% { transform:var(--ptc-stance,none) translateY(-2px); }
+    55% { transform:var(--ptc-stance,none) translateY(-3px); }
+  }
+  #screen-game.ptc-backroom #poker-table .seat.ptc-featured.active .ptc-character-art {
+    animation-play-state:paused;
+    transform:var(--ptc-stance,none) translateY(-7px);
+    filter:brightness(1.12) saturate(1.08);
+  }
+  #screen-game.ptc-backroom #poker-table .seat.ptc-featured.folded .ptc-character-art {
+    animation-play-state:paused;
+    transform:var(--ptc-stance,none) translateY(11px) rotate(4deg);
+    filter:grayscale(.7) brightness(.55);
+  }
+}
+@media (prefers-reduced-motion:reduce) {
+  #screen-game.ptc-backroom #poker-table .seat.ptc-featured .ptc-character-art {
+    animation:none!important;
+    transform:var(--ptc-stance,none);
+  }
+}
