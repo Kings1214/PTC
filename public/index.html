@@ -214,7 +214,7 @@
             <button class="btn btn-secondary" id="btn-check" onclick="sendAction('check')" title="Pass action (only if no bet to call)">Check</button>
             <button class="btn btn-secondary" id="btn-call" onclick="sendAction('call')" title="Match the current bet">Call</button>
             <div class="raise-control">
-              <input type="number" id="raise-amount" min="0" placeholder="Amt" title="Enter raise amount">
+              <input type="number" id="raise-amount" min="0" step="1" inputmode="numeric" autocomplete="off" placeholder="Min bet" title="Total bet or raise amount; minimum pre-filled">
               <button class="btn btn-primary" id="btn-raise" onclick="sendRaise()" title="Place a bet or raise an existing bet">Raise</button>
             </div>
             <button class="btn btn-allin" id="btn-allin" onclick="sendAllIn()" title="Bet all your chips">All In</button>
