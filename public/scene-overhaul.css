@@ -355,12 +355,12 @@
     55% { transform:var(--ptc-stance,none) translateY(-3px); }
   }
   #screen-game.ptc-backroom #poker-table .seat.ptc-featured.active .ptc-character-art {
-    animation-play-state:paused;
+    animation:none;
     transform:var(--ptc-stance,none) translateY(-7px);
     filter:brightness(1.12) saturate(1.08);
   }
   #screen-game.ptc-backroom #poker-table .seat.ptc-featured.folded .ptc-character-art {
-    animation-play-state:paused;
+    animation:none;
     transform:var(--ptc-stance,none) translateY(11px) rotate(4deg);
     filter:grayscale(.7) brightness(.55);
   }
