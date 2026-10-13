@@ -609,3 +609,30 @@ input[type="checkbox"] { width: auto; }
 #screen-home .btn-secondary { background:#18372d; border:1px solid #668a71; color:#f4efe6; }
 #screen-home .btn-tertiary { background:transparent; border:1px solid rgba(229,184,105,.34); color:#d9c9a9; }
 @media(max-width:480px) { #screen-home::before {inset:10px;} #screen-home .home-container {padding:40px 22px;} }
+
+/* PTC desktop poker-room refresh — mobile layouts remain unchanged */
+@media screen and (min-width: 901px) {
+ #screen-game.active {background:#0b1312;}
+ #sidebar {width:176px;background:linear-gradient(180deg,#14251f,#0d1816);border-right:1px solid #655139;padding:16px 12px;gap:20px;}
+ .sidebar-section h3 {color:#dcb976;letter-spacing:.16em;font-size:11px;margin-bottom:10px;}
+ .sidebar-player,.sidebar-spectator {background:#1b3028;border:1px solid #365144;border-radius:9px;margin-bottom:6px;padding:9px 8px;}
+ #table-container {background:radial-gradient(ellipse at 50% 48%,#24362c 0%,#131f1b 58%,#090f0e 100%);justify-content:space-between;}
+ #top-bar {height:64px;min-height:64px;background:linear-gradient(90deg,#13231e,#1d3027,#13231e);border-bottom:1px solid #6d5535;padding:10px 24px;}
+ #top-bar::before {content:"PAY THE COST";font:500 25px Georgia,serif;color:#e5b869;letter-spacing:.035em;margin-right:auto;white-space:nowrap;}
+ #top-bar .room-info {gap:12px;}
+ #top-bar .btn-tiny {background:#20382e;border:1px solid #5d684e;color:#e8dbc3;border-radius:7px;}
+ #poker-table {width:min(82%,1080px);height:clamp(340px,62vh,660px);max-height:calc(100dvh - 195px);min-height:0;margin:auto 0;border:12px solid #51311e;border-radius:49% / 44%;background:radial-gradient(ellipse at 48% 40%,#23684b 0%,#145039 57%,#0c3428 100%);box-shadow:inset 0 0 0 3px #b38a51,inset 0 0 0 12px #182c22,inset 0 0 65px #061b16,0 0 0 3px #20170f,0 25px 55px #000b;}
+ #poker-table::before {content:"";position:absolute;inset:28px;border:2px solid rgba(224,199,137,.26);border-radius:49% / 44%;pointer-events:none;}
+ #poker-table .ptc-felt-logo {color:rgba(235,209,153,.22);letter-spacing:.2em;font-family:Georgia,serif;}
+ #poker-table .seat {width:100px;min-height:57px;padding:7px 5px;background:linear-gradient(165deg,#263b32,#0b1714);border:1px solid #a48857;border-radius:13px;box-shadow:0 7px 16px #0009;}
+ #poker-table .seat.empty {background:rgba(8,27,21,.42);border:1px dashed rgba(223,202,149,.4);box-shadow:none;min-height:35px;}
+ #poker-table .seat.empty .seat-name {color:#b8c8bb;font-size:11px;}
+ #poker-table .seat.active {border-color:#efc87b;box-shadow:0 0 0 2px #e5b869,0 0 22px #e5b86988;}
+ #poker-table .seat-name {font-weight:700;}
+ #poker-table .seat-chips,#pot-display {color:#f2c66c;}
+ #action-bar {max-width:740px;width:min(88%,740px);margin:0 auto 14px;padding:14px 20px;border:1px solid #705a3d;border-radius:16px;background:linear-gradient(180deg,#23382e,#121e1a);box-shadow:0 12px 35px #0009;}
+ #action-bar .btn {border-radius:8px;min-height:42px;}
+ #action-bar .btn-secondary {background:#347958;}
+ #action-bar .btn-danger {background:#763e3e;}
+ #action-bar .btn-allin {background:#a16a31;}
+}
