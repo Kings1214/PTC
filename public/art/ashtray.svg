@@ -19,4 +19,14 @@
 <path d="M221 173l45-9" stroke="#cbb798" stroke-width="8"/><path d="M259 156l14 12-10 3-10-12Z" fill="#724323" stroke-width="3"/>
 <path d="M267 147q-19-20-5-43m4 47q13-26-4-42" fill="none" stroke="#c0c1b3" stroke-opacity=".5" stroke-width="5"/>
 <path d="M70 372q30-60 62-26l18 43M264 389q-29-52-55-38l-13 41" fill="none" stroke="#5a463a" stroke-width="23"/>
-<path d="M89 407q12-38 34-30l26 31m78 1q-9-39-32-28l-19 29" fill="#b38761" stroke-width="7"/></g></svg>
+<path d="M89 407q12-38 34-30l26 31m78 1q-9-39-32-28l-19 29" fill="#b38761" stroke-width="7"/>
+<!-- Ashtray Al: cracked reader glasses, heavy under-eye creases, ash flecks. -->
+<path d="M112 130l38-4m29 0 38 4" fill="none" stroke="#6d6250" stroke-width="7"/>
+<rect x="107" y="127" width="45" height="33" rx="11" fill="#817766" fill-opacity=".14" stroke="#ad995d" stroke-width="5"/>
+<rect x="174" y="127" width="44" height="33" rx="11" fill="#817766" fill-opacity=".14" stroke="#ad995d" stroke-width="5"/>
+<path d="M152 139h23m-50 20-11 9m73-10 11 9" stroke="#7d5e42" stroke-width="5" fill="none"/>
+<path d="M118 170q16 12 28 6m40 0q15 4 23-8" stroke="#634131" stroke-width="5" fill="none"/>
+<path d="M143 286l8 3-3 9m53 27 9-5 9 5" stroke="#a59a79" stroke-width="5" fill="none"/>
+<path d="M283 140l-10-8M278 157l9-2" stroke="#e0c6ac" stroke-width="3" stroke-opacity=".6"/>
+<circle cx="290" cy="176" r="3" fill="#ddd3bd" opacity=".5"/>
+</g></svg>
