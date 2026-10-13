@@ -24,5 +24,14 @@
 <path d="M93 368q-7-32 16-45 26-11 43 11l-9 32m78 0q-3-38-29-42-21-3-35 27l9 31" fill="#b99b83" stroke="#211916" stroke-width="8"/>
 <path d="M96 371q18-15 37-6m72 3q24-17 37 1" fill="none" stroke="#6e5446" stroke-width="5"/>
 <path d="M25 390Q5 321 35 279q22-37 80-44l28 1h49q64 0 100 43l25 111Z" fill="url(#grain)" stroke="none" opacity=".65"/>
-</g>
-</svg>
+
+<!-- Silk: raised brow, crooked smirk, expensive cuff and stolen chip. -->
+<path d="M108 105q18-11 43-7m27 2q19-4 33 6" fill="none" stroke="#6c5944" stroke-width="8"/>
+<path d="M145 174q26 4 47-4" fill="none" stroke="#7d4c40" stroke-width="4"/>
+<path d="M144 193l29-5 19-11" fill="none" stroke="#f1d7bf" stroke-width="4"/>
+<circle cx="234" cy="355" r="18" fill="#d9ac50" stroke="#6a481d" stroke-width="7"/>
+<circle cx="234" cy="355" r="11" fill="none" stroke="#f6d78f" stroke-width="2"/>
+<path d="M229 348q11 8 0 15m11-14-11 0" fill="none" stroke="#896123" stroke-width="3"/>
+<path d="M201 357q18-12 28-3" fill="none" stroke="#d2ab8d" stroke-width="9"/>
+<rect x="116" y="364" width="13" height="9" rx="3" fill="#b79e54" stroke="#685031" stroke-width="3"/>
+</g></svg>
