@@ -111,6 +111,8 @@ function showScreen(id) {
 // -------------------------
 // LOBBY LOGIC
 // -------------------------
+function startTestGame() { socket.emit('test-game'); }
+
 function createRoom() {
   const nickname = document.getElementById('host-nickname').value.trim();
   if (!nickname) return alert('Enter a nickname');
