@@ -17,4 +17,16 @@
 <path d="M136 292l25 44 17-43" fill="#6c292c" stroke="#251a18" stroke-width="6"/>
 <path d="M63 349q42-36 79 18l13 43H32Zm211 4q-36-32-75 19l-9 38h102Z" fill="#b28960" stroke-width="11"/>
 <path d="M94 359l27 27m96-2 23-22" stroke="#704b3b" stroke-width="6" fill="none"/>
+
+<!-- Mickey: toothpick, exaggerated grin, freckled cheek and tacky lapel pin. -->
+<path d="M126 195q31 20 78-1" stroke="#291b1a" stroke-width="8" fill="none"/>
+<path d="M125 201q35 13 74-3" stroke="#fff0cb" stroke-width="7" fill="none"/>
+<path d="M186 216l47-22" stroke="#e8bb72" stroke-width="5"/>
+<path d="M227 194l7-3" stroke="#ba7e3f" stroke-width="4"/>
+<circle cx="117" cy="176" r="3" fill="#935841"/><circle cx="126" cy="182" r="3" fill="#935841"/>
+<circle cx="202" cy="180" r="3" fill="#935841"/><circle cx="211" cy="172" r="3" fill="#935841"/>
+<path d="M107 108q18-12 44 0m29-3q23-9 39 4" fill="none" stroke="#241918" stroke-width="9"/>
+<path d="M112 146l30 1m41-2 25-4" stroke="#26201d" stroke-width="6"/>
+<path d="M226 316l12 7-2 14-13-7Z" fill="#e7b44c" stroke="#69431f" stroke-width="3"/>
+<path d="M232 320l-4 13" stroke="#f4e2ab" stroke-width="3"/>
 </g></svg>
