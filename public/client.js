@@ -803,12 +803,25 @@ function renderTable() {
   const callAmount = currentRoom.gameState.currentBet - (me?.currentBet || 0);
   const actualCall = Math.min(callAmount, me?.chips || 0);
   document.getElementById('btn-call').innerText = actualCall > 0 ? `Call $${actualCall}` : 'Call';
-  if (isMyTurn) {
-    const minRaise = currentRoom.gameState.currentBet + currentRoom.gameState.minRaise;
-    document.getElementById('raise-amount').min = minRaise;
-    document.getElementById('raise-amount').placeholder = `Min ${minRaise}`;
-  } else {
-    document.getElementById('raise-amount').placeholder = 'Amt';
+  // Have the minimum legal total already entered whenever betting opens.
+  // Refresh for each new turn/bet size, but never overwrite a custom amount
+  // while someone is still editing on the same turn.
+  const amountInput = document.getElementById('raise-amount');
+  const minimumTotal = currentRoom.gameState.currentBet + currentRoom.gameState.minRaise;
+  const availableTotal = (me?.chips || 0) + (me?.currentBet || 0);
+  const readyAmount = Math.min(minimumTotal, availableTotal);
+  const contextKey = isMyTurn
+    ? [currentRoom.id, currentRoom.gameState.handNumber,
+       currentRoom.gameState.bettingRound, currentRoom.gameState.currentPlayerIndex,
+       currentRoom.gameState.currentBet, currentRoom.gameState.minRaise,
+       me?.currentBet, me?.chips].join(':')
+    : 'waiting';
+  amountInput.min = String(Math.min(minimumTotal, availableTotal));
+  amountInput.max = String(availableTotal);
+  amountInput.placeholder = `Min ${minimumTotal}`;
+  if (amountInput.dataset.betContext !== contextKey) {
+    amountInput.value = availableTotal > 0 ? String(readyAmount) : '';
+    amountInput.dataset.betContext = contextKey;
   }
   if (currentRoom.gameState.timerEnd && currentRoom.gameState.status === 'playing' && currentRoom.settings.timerEnabled) {
     const endTime = currentRoom.gameState.timerEnd;
