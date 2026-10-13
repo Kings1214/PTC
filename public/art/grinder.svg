@@ -26,5 +26,17 @@
 <path d="M93 368q-7-32 16-45 26-11 43 11l-9 32m78 0q-3-38-29-42-21-3-35 27l9 31" fill="#98715f" stroke="#211916" stroke-width="8"/>
 <path d="M96 371q18-15 37-6m72 3q24-17 37 1" fill="none" stroke="#513c37" stroke-width="5"/>
 <path d="M25 390Q5 321 35 279q22-37 80-44l28 1h49q64 0 100 43l25 111Z" fill="url(#grain)" stroke="none" opacity=".65"/>
+
+<!-- Grinder: eyes always down, grime on hoodie, cards clutched close. -->
+<path d="M112 147q14 7 33 4m43 0q15 4 28-6" fill="none" stroke="#65453b" stroke-width="7" opacity=".7"/>
+<path d="M119 161q20 7 34 1m39 0q13 2 24-6" fill="none" stroke="#372b29" stroke-width="4"/>
+<path d="M134 195q24 2 42-1" stroke="#392725" stroke-width="5"/>
+<path d="M135 247l8 108m38-106-5 105" fill="none" stroke="#887d65" stroke-opacity=".7" stroke-width="5"/>
+<path d="M117 289l-10 9m96 13-12 7" stroke="#171f19" stroke-width="10" stroke-opacity=".8"/>
+<g transform="translate(174 310) rotate(-13)">
+  <rect width="46" height="63" rx="5" fill="#293c46" stroke="#b0a07f" stroke-width="5"/>
+  <rect x="8" y="8" width="30" height="47" rx="3" fill="#152733" stroke="#4a6065" stroke-width="3"/>
+  <path d="M14 15l18 32m-18 0 18-32" stroke="#907957" stroke-width="2"/>
 </g>
-</svg>
+<path d="M179 330q14-15 31-8" fill="none" stroke="#97705b" stroke-width="11"/>
+</g></svg>
