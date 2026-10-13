@@ -736,3 +736,30 @@ input[type="checkbox"] { width: auto; }
  #screen-game.active #mobile-hero-cards {top:auto;bottom:calc(100% + 2px);transform:translateX(-50%);}
  #screen-game.active #mobile-hero-cards .card {width:clamp(52px,16vw,68px);height:clamp(76px,23vw,96px);}
 }
+
+/* Back room visibility pass: visible patrons, walls and tungsten light. */
+@media screen and (min-width:901px) {
+ #table-container {
+  background:
+    radial-gradient(ellipse 32% 54% at 20% 30%,rgba(178,115,50,.27),transparent 80%),
+    radial-gradient(ellipse 30% 50% at 81% 29%,rgba(165,112,52,.23),transparent 80%),
+    linear-gradient(180deg,rgba(8,9,8,.05) 0%,rgba(0,0,0,.28) 70%,#080907 100%),
+    repeating-linear-gradient(90deg,#292820 0 110px,#24251f 111px 113px,#2b2922 114px 220px);
+ }
+ .backroom-crowd {inset:66px 0 13% 0;overflow:visible;z-index:0;}
+ .backroom-patron {width:145px;height:240px;opacity:1;filter:drop-shadow(0 10px 14px #000c);}
+ .patron-head {left:48px;top:5px;width:52px;height:66px;
+   background:radial-gradient(ellipse at 35% 35%,#9a8268 0%,#6b5544 35%,#332b25 78%);
+   box-shadow:inset -12px -8px 12px #1a1714,0 -10px 0 -5px #1b1b18;}
+ .patron-head::before {content:"";position:absolute;left:-5px;top:-8px;width:63px;height:22px;border-radius:65% 55% 20% 20%;background:#191c19;transform:rotate(-6deg);box-shadow:0 5px 2px #0008;}
+ .patron-head::after {content:"";position:absolute;left:10px;top:32px;width:35px;height:6px;border-top:3px solid #181613;border-radius:50%;opacity:.9;}
+ .patron-body {left:0;top:65px;width:145px;height:185px;border-radius:40% 40% 8% 8%;
+   background:linear-gradient(110deg,#262d28 0%,#4b5042 42%,#252a25 70%,#111713 100%);
+   box-shadow:inset -24px -5px 24px #0c0e0c, inset 12px 0 17px #111713;}
+ .patron-body::before {content:"";position:absolute;left:49%;top:0;width:17px;height:130px;background:linear-gradient(90deg,#111713,#292d27);clip-path:polygon(0 0,100% 0,65% 100%,35% 100%);opacity:.8;}
+ .patron-left {left:3%;bottom:9%;transform:rotate(-7deg) scale(1.13);}
+ .patron-mid {left:22%;bottom:40%;transform:scale(.72);opacity:.75;}
+ .patron-right {right:4%;bottom:8%;transform:rotate(6deg) scale(1.17);}
+ .patron-edge {right:22%;bottom:40%;transform:scale(.74);opacity:.75;}
+ .patron-talk {color:#e2c7a1;font-size:13px;text-shadow:0 2px 7px #000,0 0 5px #000;}
+}
