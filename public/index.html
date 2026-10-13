@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Pay the Cost | Texas Hold’em</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="scene-overhaul.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 </head>
 <body>
@@ -129,7 +130,7 @@
       </div>
     </div>
 
-    <div id="screen-game" class="screen">
+    <div id="screen-game" class="screen ptc-backroom">
       <div id="mobile-sidebar-backdrop" onclick="closeMobileSidebar()" aria-hidden="true"></div>
       <div id="sidebar">
         <button class="btn btn-tiny mobile-sidebar-close" onclick="closeMobileSidebar()" aria-label="Close players panel">Close ✕</button>
@@ -187,13 +188,6 @@
             <button class="btn btn-start" id="btn-start-game" onclick="startGame()">START GAME</button>
             <p id="waiting-text" class="waiting-text">Waiting for host to start...</p>
           </div>
-          <div id="next-hand-overlay" class="next-hand-overlay hidden">
-            <div class="next-hand-box">
-              <p class="next-hand-text" id="next-hand-status">Hand complete!</p>
-              <button class="btn btn-start" id="btn-next-hand" onclick="startNextHand()" style="display:none;">Start Next Hand</button>
-              <p class="waiting-text" id="next-hand-countdown">Waiting for host to start next hand...</p>
-            </div>
-          </div>
           <div id="community-cards"></div>
           <div id="pot-display"></div>
           <div id="seats-container"></div>
@@ -201,6 +195,13 @@
 
         <div id="action-bar">
           <div id="mobile-hero-cards" aria-label="Your cards"></div>
+          <div id="next-hand-overlay" class="next-hand-overlay hidden">
+            <div class="next-hand-box">
+              <p class="next-hand-text" id="next-hand-status">Hand complete!</p>
+              <button class="btn btn-start" id="btn-next-hand" onclick="startNextHand()" style="display:none;">Start Next Hand</button>
+              <p class="waiting-text" id="next-hand-countdown">Waiting for host to start next hand...</p>
+            </div>
+          </div>
           <div id="turn-indicator" class="turn-indicator hidden">YOUR TURN &mdash; choose an action below</div>
           <div id="action-status" class="action-status">Waiting for game to start...</div>
           <div id="timer-bar-container">
