@@ -343,6 +343,14 @@ function startTurnTimer(room) {
   clearTurnTimer(room);
   const player = getCurrentPlayer(room);
   if (!player) return;
+  if (room.isDemo && player.id.startsWith('demo-')) {
+    room.botTimer = setTimeout(() => {
+      room.botTimer = null;
+      if (room.gameState.status !== 'playing' || getCurrentPlayer(room)?.id !== player.id) return;
+      processAction(player.id, player.currentBet < room.gameState.currentBet ? 'call' : 'check', 0);
+    }, 650);
+    return;
+  }
   if (!room.settings.timerEnabled) {
     room.gameState.timerEnd = 0;
     room.players.forEach((_, sid) => io.to(sid).emit('turn-timer', { playerId: player.id, endTime: 0 }));
@@ -358,6 +366,7 @@ function startTurnTimer(room) {
 }
 
 function clearTurnTimer(room) {
+  if (room.botTimer) { clearTimeout(room.botTimer); room.botTimer = null; }
   if (room.turnTimer) {
     clearTimeout(room.turnTimer);
     room.turnTimer = null;
@@ -536,6 +545,24 @@ function endHand(room) {
 io.on('connection', (socket) => {
   console.log(`User connected: ${socket.id}`);
   
+  socket.on('test-game', () => {
+    if (Array.from(rooms.values()).some(r => r.players.has(socket.id))) return;
+    const id = generateRoomCode();
+    const settings = { smallBlind: 10, bigBlind: 20, maxPlayers: 8, startingChips: 1000, timerSeconds: 20, timerEnabled: false, rebuysAllowed: true };
+    const room = new Room(id, socket.id, 'Practice Table', '', settings);
+    room.isDemo = true;
+    room.players.set(socket.id, new Player(socket.id, 'You', 1000, 0));
+    for (let i = 1; i <= 3; i++) {
+      const bot = new Player('demo-' + id + '-' + i, 'Bot ' + i, 1000, i * 2);
+      room.players.set(bot.id, bot);
+    }
+    rooms.set(id, room);
+    socket.join(id);
+    socket.emit('joined-room', room.getPublicState(socket.id));
+    startGame(room);
+    broadcastState(room);
+  });
+
   socket.on('create-room', (data) => {
     if (!data.nickname || !data.nickname.trim()) return socket.emit('error-msg', 'Enter a nickname');
     const roomId = generateRoomCode();
