@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+<defs>
+<linearGradient id="wall" x2="0" y2="1"><stop stop-color="#201916"/><stop offset=".55" stop-color="#34241b"/><stop offset="1" stop-color="#090c09"/></linearGradient>
+<radialGradient id="lamp"><stop stop-color="#df9a43" stop-opacity=".36"/><stop offset=".35" stop-color="#a15c2d" stop-opacity=".14"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
+<linearGradient id="curtain"><stop stop-color="#1c050b"/><stop offset=".24" stop-color="#702127"/><stop offset=".4" stop-color="#3a0c13"/><stop offset=".61" stop-color="#54131a"/><stop offset=".78" stop-color="#26080b"/><stop offset="1" stop-color="#14070a"/></linearGradient>
+<radialGradient id="vignette"><stop offset=".42" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".73"/></radialGradient>
+<pattern id="speckles" width="65" height="75" patternUnits="userSpaceOnUse"><path d="M4 10l3 2 M40 52l1 3 M59 15l2 1 M22 67l4-2" stroke="#d6aa6e" stroke-opacity=".12"/><circle cx="23" cy="17" r="1" fill="#000" opacity=".6"/></pattern>
+</defs>
+<rect width="1600" height="900" fill="url(#wall)"/>
+<path d="M0 215h1600M0 232h1600M0 515h1600M0 532h1600" stroke="#100f0e" stroke-width="13" opacity=".7"/>
+<path d="M120 0v900M415 0v900M725 0v900M1035 0v900M1345 0v900" stroke="#100b0a" stroke-width="8" opacity=".5"/>
+<rect width="1600" height="900" fill="url(#speckles)"/>
+<path d="M0 0h320l-25 38-25 90 48 125-51 190-16 230-93 80-40-170L64 400 0 570Z" fill="url(#curtain)" stroke="#12050a" stroke-width="12"/>
+<path d="M1600 0h-320l25 38 25 90-48 125 51 190 16 230 93 80 40-170 54-183 64 170Z" fill="url(#curtain)" stroke="#12050a" stroke-width="12"/>
+<path d="M80 0q40 145 45 360M165 0q-15 155-18 455M240 0q-45 170-15 440M1520 0q-40 145-45 360M1435 0q15 155 18 455M1360 0q45 170 15 440" stroke="#a64e49" stroke-width="18" opacity=".16" fill="none"/>
+<path d="M800 0v150" stroke="#141310" stroke-width="15"/>
+<path d="M700 153h200l-25 40H725z" fill="#2b291e" stroke="#100d0b" stroke-width="10"/>
+<ellipse cx="800" cy="218" rx="125" ry="36" fill="#9a6b36" stroke="#17140e" stroke-width="19"/>
+<path d="M677 218q-20 34-14 80M923 218q20 34 14 80" fill="none" stroke="#bd8b45" stroke-opacity=".32" stroke-width="6"/>
+<ellipse cx="800" cy="320" rx="750" ry="420" fill="url(#lamp)"/>
+<g fill="none" stroke="#0b0d0b" stroke-width="8" opacity=".6"><path d="M400 266l25 20-20 27 11 31-35 47"/><path d="M1204 310l-15 35 18 30-20 40"/><path d="M350 490l60-15-8 30"/><path d="M1290 498l-55 14-9 39"/></g>
+<path d="M0 620Q800 500 1600 620v280H0Z" fill="#0d0e0c" opacity=".6"/>
+<rect width="1600" height="900" fill="url(#vignette)"/>
+</svg>
