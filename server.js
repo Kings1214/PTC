@@ -681,13 +681,21 @@ function transferHostIfNeeded(room, departingId) {
 function foldForDeparture(room, player) {
   if (room.gameState.status !== 'playing' ||
       room.gameState.bettingRound === 'showdown' || player.folded || player.allIn) return;
+  const otherLiveHands = [...room.players.values()]
+    .filter(p => p.id !== player.id && !p.folded && !p.isSittingOut);
+  if (otherLiveHands.length === 0) {
+    // Never fold the final surviving hand: someone must win the pot, even
+    // if everyone goes offline at the same time. Then pause the tournament.
+    endHand(room);
+    return;
+  }
   if (room.gameState.currentPlayerIndex === player.seatIndex) {
     processAction(player.id, 'fold', 0);
   } else {
     player.folded = true;
     player.hasActed = true;
     const remaining = [...room.players.values()].filter(p => !p.folded);
-    if (remaining.length === 1) endHand(room);
+    if (remaining.length <= 1) endHand(room);
   }
 }
 
