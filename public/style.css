@@ -763,3 +763,55 @@ input[type="checkbox"] { width: auto; }
  .patron-edge {right:22%;bottom:40%;transform:scale(.74);opacity:.75;}
  .patron-talk {color:#e2c7a1;font-size:13px;text-shadow:0 2px 7px #000,0 0 5px #000;}
 }
+
+/* Actual seated opponents: illustrated, individually styled back-room regulars. */
+#poker-table .seat:not(.empty):not(.my-seat) {overflow:visible;isolation:isolate;}
+.ptc-opponent-portrait {
+ --skin:#b78a65;--coat:#493f3b;--hair:#2b2724;
+ position:absolute;left:50%;bottom:calc(100% + 7px);
+ width:104px;height:106px;transform:translateX(-50%);
+ pointer-events:none;z-index:-1;filter:drop-shadow(0 5px 8px #000b);
+}
+.ptc-opponent-portrait .character-shoulders {
+ position:absolute;bottom:0;left:4px;width:96px;height:57px;
+ border-radius:48% 48% 8px 8px;
+ background:linear-gradient(115deg,#141615,var(--coat) 38%,#161715 95%);
+ border:1px solid #14130f;
+}
+.ptc-opponent-portrait .character-neck {position:absolute;left:43px;bottom:41px;width:21px;height:22px;background:var(--skin);border-radius:7px;}
+.ptc-opponent-portrait .character-face {
+ position:absolute;left:32px;top:12px;width:44px;height:55px;
+ border-radius:43% 43% 48% 48%;
+ background:linear-gradient(110deg,#604535,var(--skin) 35%,#70503a 85%,#2b211d);
+ box-shadow:inset -7px -5px 8px #261c17;
+}
+.ptc-opponent-portrait .character-eyes {
+ position:absolute;left:6px;top:22px;width:33px;height:10px;
+ border-radius:6px;background:linear-gradient(#151715 0 75%,#665044 76%);
+ box-shadow:0 2px 0 #352a25;
+}
+.ptc-opponent-portrait .character-mouth {
+ position:absolute;left:13px;top:41px;width:19px;height:4px;
+ border-bottom:2px solid #3b2421;border-radius:50%;
+}
+.ptc-opponent-portrait .character-hair {
+ position:absolute;left:28px;top:5px;width:51px;height:23px;
+ border-radius:75% 40% 15% 12%;background:var(--hair);
+ box-shadow:inset 4px 2px 5px #6a5a47;
+}
+.ptc-opponent-portrait.character-0 {--skin:#b98c69;--coat:#5a292a;--hair:#22201e;}
+.ptc-opponent-portrait.character-1 {--skin:#ae805d;--coat:#303b34;--hair:#413125;}
+.ptc-opponent-portrait.character-1 .character-hair {height:15px;border-radius:70% 70% 10% 10%;}
+.ptc-opponent-portrait.character-1 .character-mouth {height:8px;border-bottom:5px solid #382b22;}
+.ptc-opponent-portrait.character-2 {--skin:#d0a782;--coat:#4b4035;--hair:#b4a69a;}
+.ptc-opponent-portrait.character-2 .character-eyes {background:#151716;box-shadow:0 0 0 2px #aa8e61;}
+.ptc-opponent-portrait.character-3 {--skin:#916d58;--coat:#33343c;--hair:#241d1d;}
+.ptc-opponent-portrait.character-3 .character-hair {height:27px;transform:rotate(-9deg);}
+#poker-table .seat.folded .ptc-opponent-portrait {opacity:.45;}
+#poker-table .seat.active .ptc-opponent-portrait {filter:drop-shadow(0 0 12px #b99657);}
+@media screen and (max-width:900px) {
+ .ptc-opponent-portrait {transform:translateX(-50%) scale(.68);transform-origin:bottom center;bottom:calc(100% + 2px);}
+}
+@media screen and (max-width:600px) and (orientation:portrait) {
+ .ptc-opponent-portrait {transform:translateX(-50%) scale(.47);bottom:calc(100% - 1px);}
+}
