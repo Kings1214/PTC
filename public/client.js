@@ -207,6 +207,7 @@ socket.on('joined-room', (state) => {
   currentRoom = state;
   mySocketId = socket.id;
   showScreen('screen-game');
+  scheduleWaterDrip();
   renderTable();
   document.getElementById('room-code-display').innerText = `Room: ${state.id}`;
   document.getElementById('host-display').innerText = `| Host: ${state.players.find(p => p.id === state.hostId)?.name || 'N/A'}`;
@@ -818,6 +819,7 @@ function sendAllIn() {
 }
 
 function leaveRoom() {
+  clearTimeout(dripTimeout);
   socket.disconnect();
   location.reload();
 }
@@ -986,8 +988,44 @@ function copyCode() {
   alert('Room code copied: ' + currentRoom.id);
 }
 
+// Occasional leaking-pipe droplets for the Back Room. Synthesized locally;
+// no downloaded audio, and the existing mute button controls it.
+let dripTimeout = null;
+function playWaterDrip() {
+  if (!soundEnabled || !currentRoom) return;
+  initAudio();
+  if (audioCtx.state === 'suspended') return;
+  const now = audioCtx.currentTime;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  const filter = audioCtx.createBiquadFilter();
+  filter.type = 'lowpass';
+  filter.frequency.value = 1300;
+  osc.type = 'sine';
+  const startHz = 520 + Math.random() * 400;
+  osc.frequency.setValueAtTime(startHz, now);
+  osc.frequency.exponentialRampToValueAtTime(startHz * .42, now + .13);
+  gain.gain.setValueAtTime(.0001, now);
+  gain.gain.exponentialRampToValueAtTime(.027, now + .012);
+  gain.gain.exponentialRampToValueAtTime(.0001, now + .22);
+  osc.connect(filter).connect(gain).connect(audioCtx.destination);
+  osc.start(now);
+  osc.stop(now + .23);
+}
+function scheduleWaterDrip() {
+  clearTimeout(dripTimeout);
+  dripTimeout = null;
+  if (!soundEnabled || !currentRoom) return;
+  dripTimeout = setTimeout(() => {
+    playWaterDrip();
+    scheduleWaterDrip();
+  }, 3500 + Math.random() * 8500);
+}
+
 function toggleSound() {
   soundEnabled = !soundEnabled;
+  if (soundEnabled) { initAudio(); audioCtx.resume(); scheduleWaterDrip(); }
+  else { clearTimeout(dripTimeout); dripTimeout = null; }
   document.getElementById('sound-btn').innerText = soundEnabled ? '🔊' : '🔇';
   document.getElementById('sound-btn').style.opacity = soundEnabled ? '1' : '0.5';
 }
